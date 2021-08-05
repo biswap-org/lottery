@@ -647,7 +647,7 @@ interface IBiswapLottery {
      * @notice Start the lottery
      * @dev Callable by operator
      * @param _endTime: endTime of the lottery
-     * @param _priceTicketInBSW: price of a ticket in BSW
+     * @param _priceTicketInUSDT: price of a ticket in BSW
      * @param _discountDivisor: the divisor to calculate the discount magnitude for bulks
      * @param _rewardsBreakdown: breakdown of rewards per bracket (must sum to 10,000)
      */

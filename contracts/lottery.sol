@@ -650,14 +650,12 @@ interface IBiswapLottery {
      * @param _priceTicketInBSW: price of a ticket in BSW
      * @param _discountDivisor: the divisor to calculate the discount magnitude for bulks
      * @param _rewardsBreakdown: breakdown of rewards per bracket (must sum to 10,000)
-     * @param _treasuryFee: treasury fee (10,000 = 100%, 100 = 1%)
      */
     function startLottery(
         uint256 _endTime,
-        uint256 _priceTicketInBSW,
+        uint256 _priceTicketInUSDT,
         uint256 _discountDivisor,
-        uint256[6] calldata _rewardsBreakdown,
-        uint256 _treasuryFee
+        uint256[6] calldata _rewardsBreakdown
     ) external;
 
     /**
@@ -724,7 +722,6 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         uint256 priceTicketInUSDT;
         uint256 discountDivisor;
         uint256[6] rewardsBreakdown; // 0: 1 matching number // 5: 6 matching numbers
-//        uint256 treasuryFee; // 500: 5% // 200: 2% // 50: 0.5%
         uint256[6] bswPerBracket;
         uint256[6] countWinnersPerBracket;
         uint256 firstTicketId;
@@ -1089,74 +1086,70 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
      * @param _priceTicketInUSDT: price of a ticket in USDT
      * @param _discountDivisor: the divisor to calculate the discount magnitude for bulks
      * @param _rewardsBreakdown: breakdown of rewards per bracket (must sum to 10,000)
-     * @param _treasuryFee: treasury fee (10,000 = 100%, 100 = 1%)
      */
     function startLottery(
         uint256 _endTime,
         uint256 _priceTicketInUSDT,
         uint256 _discountDivisor,
         uint256[6] calldata _rewardsBreakdown
-//        uint256 _treasuryFee
-        ) external override onlyOperator {
-    require(
-    (currentLotteryId == 0) || (_lotteries[currentLotteryId].status == Status.Claimable),
-    "Not time to start lottery"
-    );
+    ) external override onlyOperator {
+        require(
+            (currentLotteryId == 0) || (_lotteries[currentLotteryId].status == Status.Claimable),
+            "Not time to start lottery"
+        );
 
-    require(
-    ((_endTime - block.timestamp) > MIN_LENGTH_LOTTERY) && ((_endTime - block.timestamp) < MAX_LENGTH_LOTTERY),
-    "Lottery length outside of range"
-    );
+        require(
+            ((_endTime - block.timestamp) > MIN_LENGTH_LOTTERY) && ((_endTime - block.timestamp) < MAX_LENGTH_LOTTERY),
+            "Lottery length outside of range"
+        );
 
-    //Calculation price in BSW
-    uint256 _priceTicketInBSW = getPriceInBSW(_priceTicketInUSDT);
+        //Calculation price in BSW
+        uint256 _priceTicketInBSW = getPriceInBSW(_priceTicketInUSDT);
 
-    require(
-    (_priceTicketInBSW >= minPriceTicketInBSW) && (_priceTicketInBSW <= maxPriceTicketInBSW),
-    "Price ticket in BSW Outside of limits"
-    );
+        require(
+            (_priceTicketInBSW >= minPriceTicketInBSW) && (_priceTicketInBSW <= maxPriceTicketInBSW),
+            "Price ticket in BSW Outside of limits"
+        );
 
-    require(_discountDivisor >= MIN_DISCOUNT_DIVISOR, "Discount divisor too low");
-        //    require(_treasuryFee <= MAX_TREASURY_FEE, "Treasury fee too high");
+        require(_discountDivisor >= MIN_DISCOUNT_DIVISOR, "Discount divisor too low");
 
-    require(
-    (_rewardsBreakdown[0] +
-    _rewardsBreakdown[1] +
-    _rewardsBreakdown[2] +
-    _rewardsBreakdown[3] +
-    _rewardsBreakdown[4] +
-    _rewardsBreakdown[5]) == 10000,
-    "Rewards must equal 10000"
-    );
+        require(
+            (_rewardsBreakdown[0] +
+            _rewardsBreakdown[1] +
+            _rewardsBreakdown[2] +
+            _rewardsBreakdown[3] +
+            _rewardsBreakdown[4] +
+            _rewardsBreakdown[5]) == 10000,
+            "Rewards must equal 10000"
+        );
 
-    currentLotteryId++;
-    _lotteries[currentLotteryId] = Lottery({
-        status: Status.Open,
-        startTime: block.timestamp,
-        endTime: _endTime,
-        priceTicketInBSW: _priceTicketInBSW,
-        priceTicketInUSDT: _priceTicketInUSDT,
-        discountDivisor: _discountDivisor,
-        rewardsBreakdown: _rewardsBreakdown,
-//        treasuryFee: _treasuryFee,
-        bswPerBracket: [uint256(0), uint256(0), uint256(0), uint256(0), uint256(0), uint256(0)],
-        countWinnersPerBracket: [uint256(0), uint256(0), uint256(0), uint256(0), uint256(0), uint256(0)],
-        firstTicketId: currentTicketId,
-        firstTicketIdNextLottery: currentTicketId,
-        amountCollectedInBSW: pendingInjectionNextLottery,
-        finalNumber: 0
-    });
+        currentLotteryId++;
+        _lotteries[currentLotteryId] = Lottery({
+            status: Status.Open,
+            startTime: block.timestamp,
+            endTime: _endTime,
+            priceTicketInBSW: _priceTicketInBSW,
+            priceTicketInUSDT: _priceTicketInUSDT,
+            discountDivisor: _discountDivisor,
+            rewardsBreakdown: _rewardsBreakdown,
+            bswPerBracket: [uint256(0), uint256(0), uint256(0), uint256(0), uint256(0), uint256(0)],
+            countWinnersPerBracket: [uint256(0), uint256(0), uint256(0), uint256(0), uint256(0), uint256(0)],
+            firstTicketId: currentTicketId,
+            firstTicketIdNextLottery: currentTicketId,
+            amountCollectedInBSW: pendingInjectionNextLottery,
+            finalNumber: 0
+        });
 
-    emit LotteryOpen(
-        currentLotteryId,
-        block.timestamp,
-        _endTime,
-        _priceTicketInUSDT,
-        currentTicketId,
-        pendingInjectionNextLottery
-    );
+        emit LotteryOpen(
+            currentLotteryId,
+            block.timestamp,
+            _endTime,
+            _priceTicketInUSDT,
+            currentTicketId,
+            pendingInjectionNextLottery
+        );
 
-    pendingInjectionNextLottery = 0;
+        pendingInjectionNextLottery = 0;
     }
 
     /**

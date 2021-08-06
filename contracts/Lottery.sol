@@ -720,7 +720,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         uint256 endTime;
         uint256 priceTicketInBSW;
         uint256 priceTicketInUSDT;
-        uint256 discountDivisor;
+        uint256 discountDivisor;    //Must be 10000 for discount 4,99% for 500 tickets
         uint256[6] rewardsBreakdown; // 0: 1 matching number // 5: 6 matching numbers
         uint256[6] bswPerBracket;
         uint256[6] countWinnersPerBracket;
@@ -820,7 +820,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     /**
      * @notice Buy tickets for the current lottery
      * @param _lotteryId: lotteryId
-     * @param _ticketNumbers: array of ticket numbers between 1,000,000 and 1,999,999
+     * @param _ticketNumbers: array of ticket numbers between 1,000,000 and 1,999,999 TAKE CARE! NUMBERS IS INVERTED
      * @dev Callable by users
      */
     function buyTickets(uint256 _lotteryId, uint32[] calldata _ticketNumbers)
@@ -932,6 +932,14 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         bswToken.safeTransfer(msg.sender, rewardInBSWToTransfer);
 
         emit TicketsClaim(msg.sender, rewardInBSWToTransfer, _lotteryId, _ticketIds.length);
+    }
+    //TODO add function to interface
+    function getCurrentTicketPriceInBSW(uint _lotteryId) external view returns(uint){
+        return priceOracle.consult(
+            usdtTokenAddress,
+            _lotteries[_lotteryId].priceTicketInUSDT,
+            bswTokenAddress
+        );
     }
 
     /**

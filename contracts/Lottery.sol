@@ -662,6 +662,8 @@ interface IBiswapLottery {
      * @notice View current lottery id
      */
     function viewCurrentLotteryId() external returns (uint256);
+
+    function getCurrentTicketPriceInBSW(uint _lotteryId) external view returns(uint);
 }
 
 // File: contracts/BiswapLottery.sol
@@ -933,8 +935,8 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
 
         emit TicketsClaim(msg.sender, rewardInBSWToTransfer, _lotteryId, _ticketIds.length);
     }
-    //TODO add function to interface
-    function getCurrentTicketPriceInBSW(uint _lotteryId) external view returns(uint){
+
+    function getCurrentTicketPriceInBSW(uint _lotteryId) override external view returns(uint){
         return priceOracle.consult(
             usdtTokenAddress,
             _lotteries[_lotteryId].priceTicketInUSDT,

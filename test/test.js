@@ -138,6 +138,7 @@ describe(`Check start new lottery`, function () {
             .to.be.emit(lottery, `LotteryNumberDrawn`)
         let viewLottery = await lottery.viewLottery(1);
 
+
         console.log("Winning number: ", viewLottery.finalNumber.toString());
         console.log("Winning amount per bracket: ", viewLottery.bswPerBracket.toString());
         console.log("Count winners per bracket: ", viewLottery.countWinnersPerBracket.toString());

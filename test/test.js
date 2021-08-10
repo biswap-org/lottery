@@ -1,6 +1,6 @@
 const { expect } = require(`chai`);
 const { BigNumber } = require("ethers");
-const { ethers, network } = require(`hardhat`);
+const { ethers, network} = require(`hardhat`);
 const {use} = require("chai");
 
 let accounts,owner, bswToken, oracle, rng, lottery;
@@ -33,7 +33,6 @@ before(async function(){
     bracketCalculator[3] = 1111;
     bracketCalculator[4] = 11111;
     bracketCalculator[5] = 111111;
-
 });
 // await network.provider.send("evm_mine");
 // await network.provider.send("evm_setNextBlockTimestamp", [1625097600])
@@ -135,10 +134,10 @@ describe(`Check start new lottery`, function () {
     })
 
     it('Check buy 500 tickets from 1 transaction', async function (){
-        let ticketsNumbers = Array.from(Array(50),
+        let ticketsNumbers = Array.from(Array(100),
             () => (Math.floor(Math.random() * (1999999 - 1000000 + 1)) + 1000000));
 
-        await lottery.setMaxNumberTicketsPerBuy(50);
+        await lottery.setMaxNumberTicketsPerBuy(100);
         let balanceLotteryBefore = await bswToken.balanceOf(lottery.address);
         let currentPriceInBSW = await lottery.getCurrentTicketPriceInBSW(lottery.currentLotteryId());
         let totalAmountForTickets = lottery.calculateTotalPriceForBulkTickets(10000, currentPriceInBSW, ticketsNumbers.length);

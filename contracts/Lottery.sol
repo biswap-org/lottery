@@ -750,9 +750,6 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
 
     // Bracket calculator is used for verifying claims for ticket prizes
     mapping(uint32 => uint32) private _bracketCalculator;
-    //TODO delete
-    // Keeps track of number of ticket per unique combination for each lotteryId
-    mapping(uint256 => mapping(uint32 => uint256)) private _numberTicketsPerLotteryId;
 
     // Keep track of user ticket ids for a given lotteryId
     mapping(address => mapping(uint256 => uint256[])) private _userTicketIdsPerLotteryId;
@@ -856,7 +853,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
 
         // Transfer BSW tokens to this contract
         bswToken.safeTransferFrom(address(msg.sender), address(this), amountBSWToTransfer);
-        //TODO withdraw burn refferals and competitions when lottery closed
+
         //withdraw burn and competitions sums
         uint burnSum = (amountBSWToTransfer / 10000) * burningShare;
         uint competitionAndRefSum = (amountBSWToTransfer / 10000) * competitionAndRefShare;
@@ -987,7 +984,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         uint32 finalNumber = randomGenerator.viewRandomResult();
         uint ticketsCountPerBrackets = 0;
         uint bswSumPerBrackets = 0;
-        for (uint i = 0; i < _bswPerBracket.length; i++){
+        for (uint i = 0; i < 6; i++){
             bswSumPerBrackets += _bswPerBracket[i] * _countTicketsPerBracket[i];
             ticketsCountPerBrackets += _countTicketsPerBracket[i];
         }

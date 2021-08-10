@@ -697,8 +697,8 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     uint256 public currentLotteryId;
     uint256 public currentTicketId;
 
-    uint256 public burningShare = 1400; //1400: 14%
-    uint256 public competitionAndRefShare = 600; //600: 6%
+    uint256 public burningShare = 1300; //1300: 14%
+    uint256 public competitionAndRefShare = 700; //700: 6%
 
     uint256 public maxNumberTicketsPerBuyOrClaim = 100;
 

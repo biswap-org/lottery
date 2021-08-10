@@ -54,12 +54,49 @@ function getBracketsForTickets(ticketsIds, ticketsNumbers, winNumber){
             }
         }
     }
+    // Map(key: ticketId, value: bracket)
     return winTicketsId;
+}
+
+function getCountTicketsOnBrackets(ticketsNumbers, winningNumber, rewardsBreakdown, amountCollectedInBSW){
+    let bswPerBracket = [];
+    let countTicketsPerBracket = [];
+    let ticketsOnBrackets = new Map();
+    let amountToInjectNextLottery = 0;
+    ticketsOnBrackets.constructor.prototype.increment = function (key) {
+        this.has(key) ? this.set(key, this.get(key) + 1) : this.set(key, 1);
+    }
+    for(let i = 0;i < ticketsNumbers.length; i++){
+        if(ticketsNumbers[i] < 1000000 || ticketsNumbers[i] > 1999999){
+            console.log('Wrong ticket number', ticketsNumbers[i]);
+            return 0;
+        }
+        for(let j = 0; j < 6; j++){
+        ticketsOnBrackets.increment(bracketCalculator[j] + ticketsNumbers[i] % 10**(j+1));
+        }
+    }
+    let previousCount = 0;
+    for(let i = 5; i>=0; i--){
+        let transfWinningNumber = bracketCalculator[i] + (winningNumber % 10**(i+1));
+        countTicketsPerBracket[i] = (ticketsOnBrackets.get(transfWinningNumber) - previousCount) || 0;
+
+        if(countTicketsPerBracket[i] > 0){
+            if(rewardsBreakdown[i] > 0){
+                bswPerBracket[i] = ((rewardsBreakdown[i] * amountCollectedInBSW) / countTicketsPerBracket[i]) / 10000;
+                previousCount = ticketsOnBrackets.get(transfWinningNumber);
+            }
+        } else {
+            bswPerBracket[i] = 0;
+            amountToInjectNextLottery += (rewardsBreakdown[i] * amountCollectedInBSW) / 10000;
+        }
+    }
+    return [countTicketsPerBracket, bswPerBracket, amountToInjectNextLottery];
 }
 
 describe(`Check start new lottery`, function () {
     let endTime;
     it(`Start new lottery`, async function () {
+        console.log(getCountTicketsOnBrackets([1889272, 1625425, 1865387, 1255285], 1355385,[125, 375, 750, 1250, 2500, 5000], 10000));
         const timeLastBlock = (await ethers.provider.getBlock(`latest`)).timestamp;
         endTime = timeLastBlock + 14400; //after 4 hours
         let priceTicketInUSDT = BigNumber.from(`1000000000000000000`);

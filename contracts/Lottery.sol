@@ -983,6 +983,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         // Initialize a number to count addresses in the previous bracket
         uint256 numberAddressesInPreviousBracket;
 
+        //TODO withdraw burn, competitions and refferals on this function
         // Calculate the amount to share post-treasury fee
 //        uint256 amountToShareToWinners = (
 //        ((_lotteries[_lotteryId].amountCollectedInBSW) * (10000 - _lotteries[_lotteryId].treasuryFee))

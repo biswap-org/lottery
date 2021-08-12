@@ -171,9 +171,9 @@ describe(`Check start new lottery`, function () {
     })
 
     it('Check buy 500 tickets from 1 transaction', async function (){
-        ticketsNumbers = Array.from(Array(200),
+        ticketsNumbers = Array.from(Array(100),
             () => (Math.floor(Math.random() * (1999999 - 1000000 + 1)) + 1000000));
-
+        console.log(ticketsNumbers);
         await lottery.setMaxNumberTicketsPerBuy(200);
         let balanceLotteryBefore = await bswToken.balanceOf(lottery.address);
         let currentPriceInBSW = await lottery.getCurrentTicketPriceInBSW(lottery.currentLotteryId());

@@ -62,7 +62,7 @@ function getCountTicketsOnBrackets(ticketsNumbers, winningNumber, rewardsBreakdo
     let bswPerBracket = [];
     let countTicketsPerBracket = [];
     let ticketsOnBrackets = new Map();
-    let amountToInjectNextLottery = 0;
+    let amountToInjectNextLottery = new BigNumber.from(0);
     ticketsOnBrackets.constructor.prototype.increment = function (key) {
         this.has(key) ? this.set(key, this.get(key) + 1) : this.set(key, 1);
     }
@@ -82,22 +82,25 @@ function getCountTicketsOnBrackets(ticketsNumbers, winningNumber, rewardsBreakdo
 
         if(countTicketsPerBracket[i] > 0){
             if(rewardsBreakdown[i] > 0){
-                bswPerBracket[i] = ((amountCollectedInBSW.mul(rewardsBreakdown[i])).div(countTicketsPerBracket[i])).div(10000);
+                bswPerBracket[i] = (((amountCollectedInBSW.mul(rewardsBreakdown[i])).div(countTicketsPerBracket[i]))
+                    .div(10000))
+                    .add(1); // To Warn correct rounding when infinite fraction
                 previousCount = ticketsOnBrackets.get(transfWinningNumber);
             }
         } else {
             bswPerBracket[i] = 0;
-            amountToInjectNextLottery += (rewardsBreakdown[i] * amountCollectedInBSW) / 10000;
+            amountToInjectNextLottery = amountToInjectNextLottery
+                .add((amountCollectedInBSW.mul(rewardsBreakdown[i])).div(10000))
         }
     }
     return [bswPerBracket, countTicketsPerBracket, amountToInjectNextLottery];
 }
-
-describe(`Check start new lottery`, function () {
     let endTime, ticketsNumbers, burningShare, competitionAndRefShare;
     let rewardsBreakdown = [250, 375, 625, 1250, 2500, 5000];
     let priceTicketInUSDT = BigNumber.from(`1000000000000000000`);
     let discountDivisor = 10000;
+
+describe(`Check start new lottery`, function () {
 
     it(`Start new lottery`, async function () {
         const timeLastBlock = (await ethers.provider.getBlock(`latest`)).timestamp;
@@ -127,10 +130,13 @@ describe(`Check start new lottery`, function () {
         let amountCollectedInBSW = (await lottery.viewLottery(1)).amountCollectedInBSW;
         burningShare = await lottery.burningShare();
         competitionAndRefShare = await lottery.competitionAndRefShare();
-        let amountToDistribute = amountCollectedInBSW.sub(amountCollectedInBSW.div(10000).mul(burningShare.add(competitionAndRefShare)))
-        let calculateBrackets = getCountTicketsOnBrackets(ticketsNumbers, randomResult, rewardsBreakdown, amountToDistribute);
-        await expect(lottery.drawFinalNumberAndMakeLotteryClaimable(1, calculateBrackets[0], calculateBrackets[1], true))
-            .to.be.emit(lottery, `LotteryNumberDrawn`)
+        let amountToDistribute =
+            amountCollectedInBSW.sub(amountCollectedInBSW.div(10000).mul(burningShare.add(competitionAndRefShare)))
+        let calculateBrackets =
+            getCountTicketsOnBrackets(ticketsNumbers, randomResult, rewardsBreakdown, amountToDistribute);
+        await expect(
+            lottery.drawFinalNumberAndMakeLotteryClaimable(1, calculateBrackets[0], calculateBrackets[1], true)
+        ).to.be.emit(lottery, `LotteryNumberDrawn`)
         expect(amountCollectedInBSW.div(10000).mul(burningShare.add(competitionAndRefShare)))
             .to.equal((await bswToken.balanceOf(accounts[1].address)).add(await bswToken.balanceOf(accounts[2].address)));
         let viewLottery = await lottery.viewLottery(1);
@@ -166,15 +172,15 @@ describe(`Chek start new lottery and inject from previous lottery`, function(){
         await expect(lottery.startLottery(endTime, priceTicketInUSDT, discountDivisor, rewardsBreakdown)).to.be
             .emit(lottery,'LotteryOpen');
         let currentLottery = await lottery.viewLottery(await lottery.currentLotteryId());
-        expect(currentLottery.amountCollectedInBSW).equal(await bswToken.balanceOf(lottery.address));
-        expect(await lottery.pendingInjectionNextLottery()).equal(0);
+        expect(currentLottery.amountCollectedInBSW).equal(0);
         console.log(`Lottery start. Current lottery id: `, (await lottery.currentLotteryId()).toString());
+        console.log(`injection on next lottery:`, (await lottery.pendingInjectionNextLottery()).toString());
     })
 
-    it('Check buy 500 tickets from 1 transaction', async function (){
+    it('Check buy 200 tickets from 1 transaction', async function (){
         ticketsNumbers = Array.from(Array(200),
             () => (Math.floor(Math.random() * (1999999 - 1000000 + 1)) + 1000000));
-        await lottery.setMaxNumberTicketsPerBuy(500);
+        await lottery.setMaxNumberTicketsPerBuy(200);
         let balanceLotteryBefore = await bswToken.balanceOf(lottery.address);
         let currentPriceInBSW = await lottery.getCurrentTicketPriceInBSW(lottery.currentLotteryId());
         let totalAmountForTickets = lottery.calculateTotalPriceForBulkTickets(10000, currentPriceInBSW, ticketsNumbers.length);
@@ -182,8 +188,66 @@ describe(`Chek start new lottery and inject from previous lottery`, function(){
         await expect(lottery.buyTickets(lottery.currentLotteryId(), ticketsNumbers))
             .to.be.emit(lottery, `TicketsPurchase`);
         let balanceLotteryAfter = await bswToken.balanceOf(lottery.address);
-        console.log(balanceLotteryBefore.toString(), balanceLotteryAfter.toString());
+        // console.log(balanceLotteryBefore.toString(), balanceLotteryAfter.toString());
     });
+
+    it(`Check buy to many than approve tickets`, async function(){
+        await lottery.setMaxNumberTicketsPerBuy(50);
+        let currentPriceInBSW = await lottery.getCurrentTicketPriceInBSW(lottery.currentLotteryId());
+        let totalAmountForTickets = lottery.calculateTotalPriceForBulkTickets(10000, currentPriceInBSW, ticketsNumbers.length);
+        await bswToken.approve(lottery.address, totalAmountForTickets);
+        await expect(lottery.buyTickets(lottery.currentLotteryId(), ticketsNumbers))
+            .to.be.revertedWith(`Too many tickets`);
+    });
+
+    it(`Check Id's tickets`, async function (){
+        let userInfo2 = await lottery.viewUserInfoForLotteryId(accounts[0].address, 2, 0, 200);
+        let userInfo1 = await lottery.viewUserInfoForLotteryId(accounts[0].address, 1, 0, 100);
+
+        let testArrayForFirstLottery = (function(a,b,c){c=[];while(a--)c[a]=a+b;return c})(6,0);
+        let testArrayForSecondLottery = (function(a,b,c){c=[];while(a--)c[a]=a+b;return c})(200,6);
+
+        expect(userInfo1[0].toString()).equal(testArrayForFirstLottery.toString());
+        expect(userInfo2[0].toString()).equal(testArrayForSecondLottery.toString());
+    });
+
+    it(`Close lottery 2`, async function(){
+        await network.provider.send("evm_setNextBlockTimestamp", [endTime + 1]);
+        await expect(lottery.closeLottery(2)).to.be.emit(lottery, `LotteryClose`);
+    });
+
+    it(`Check make lottery 2 claimable`, async function (){
+        let lottery_info = await lottery.viewLottery(2);
+        let _amountCollectedInBSW = lottery_info.amountCollectedInBSW;
+        let _firstTicketId = lottery_info.firstTicketId;
+        let _lastTicketId = lottery_info.firstTicketIdNextLottery;
+        let totalTicketsPerLottery = _lastTicketId - _firstTicketId;
+        let ticketIdsForCurLottery =
+            (function(a,b,c){c=[];while(a--)c[a]=a+b;return c})(totalTicketsPerLottery,_firstTicketId.toNumber());
+        let ticketsNumbers = (await lottery.viewNumbersAndStatusesForTicketIds(ticketIdsForCurLottery))[0];
+        let randomResult = await rng.viewRandomResult();
+        let amountToDistribute = _amountCollectedInBSW
+                .sub((_amountCollectedInBSW).div(10000).mul(burningShare.add(competitionAndRefShare)))
+                .add(await lottery.pendingInjectionNextLottery());
+        let calculateBrackets =
+            getCountTicketsOnBrackets(ticketsNumbers, randomResult, rewardsBreakdown, amountToDistribute);
+        console.log(calculateBrackets[0].toString());
+        console.log(calculateBrackets[1].toString());
+        console.log(calculateBrackets[2].toString());
+        await expect(lottery.drawFinalNumberAndMakeLotteryClaimable(2, calculateBrackets[0], calculateBrackets[1], true))
+            .to.be.emit(lottery, 'LotteryNumberDrawn');
+
+        expect((await lottery.pendingInjectionNextLottery())).equal(calculateBrackets[2]);
+
+    });
+
+    it(`check claim ticket from different accounts`, async function(){
+        let userInfo = await lottery.viewUserInfoForLotteryId(accounts[0].address, 2, 0, 5);
+
+    });
+
+        // check claim ticket from different accounts,
+        // check withdraw injection sum after lottery finished`
 //TODO chek claim same ticket 2 times,
 // check withdraw injection sum after lottery finished,
 // check claim ticket from different accounts,

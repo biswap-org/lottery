@@ -703,7 +703,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
 
     uint256 public maxPriceTicketInBSW = 50 ether;
     uint256 public minPriceTicketInBSW = 0.005 ether;
-    uint256 public maxDiffPriceUpdate = 500; //Difference between old and new price given from oracle
+    uint256 public maxDiffPriceUpdate = 1500; //Difference between old and new price given from oracle
 
     uint256 public pendingInjectionNextLottery;
 
@@ -995,14 +995,14 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
             ticketsCountPerBrackets += _countTicketsPerBracket[i];
             if(_countTicketsPerBracket[i] > 0){
                 require(
-                    winningPoolPerBracket == (_lotteries[_lotteryId].rewardsBreakdown[i] * amountToDistribute) / 10000,
+                    winningPoolPerBracket >= (_lotteries[_lotteryId].rewardsBreakdown[i] * amountToDistribute) / 10000,
                     'Wrong amount on bracket'
                 );
             }
             bswSumPerBrackets += winningPoolPerBracket;
         }
 
-        require(bswSumPerBrackets <= amountToDistribute, 'Wrong brackets amount');
+        require(bswSumPerBrackets <= amountToDistribute, 'Wrong brackets Total amount');
 
         _lotteries[_lotteryId].bswPerBracket = _bswPerBracket;
         _lotteries[_lotteryId].countWinnersPerBracket = _countTicketsPerBracket;
@@ -1375,8 +1375,8 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         require(_lotteries[_lotteryId].status == Status.Close, "Lottery not close");
 
         uint collectedAmount = _lotteries[_lotteryId].amountCollectedInBSW;
-        uint burnSum = (collectedAmount / 10000) * burningShare;
-        uint competitionAndRefSum = (collectedAmount / 10000) * competitionAndRefShare;
+        uint burnSum = (collectedAmount * burningShare) / 10000 ;
+        uint competitionAndRefSum = (collectedAmount * competitionAndRefShare) / 10000 ;
         bswToken.safeTransfer(burningAddress, burnSum);
         bswToken.safeTransfer(competitionAndRefAddress, competitionAndRefSum);
         return (collectedAmount - burnSum - competitionAndRefSum);

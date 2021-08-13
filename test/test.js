@@ -184,5 +184,9 @@ describe(`Chek start new lottery and inject from previous lottery`, function(){
         let balanceLotteryAfter = await bswToken.balanceOf(lottery.address);
         console.log(balanceLotteryBefore.toString(), balanceLotteryAfter.toString());
     });
-
+//TODO chek claim same ticket 2 times,
+// check withdraw injection sum after lottery finished,
+// check claim ticket from different accounts,
+// check change burn and competitions fee,
+// chek change price
 })

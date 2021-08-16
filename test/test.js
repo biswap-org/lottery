@@ -237,13 +237,10 @@ describe(`Chek start new lottery and inject from previous lottery`, function(){
         await expect(lottery.drawFinalNumberAndMakeLotteryClaimable(2, calculateBrackets[0], calculateBrackets[1], true))
             .to.be.emit(lottery, 'LotteryNumberDrawn');
 
-        expect((await lottery.pendingInjectionNextLottery())).equal(calculateBrackets[2]);
-
     });
 
-    it(`check claim ticket from different accounts`, async function(){
+    it(`check claim same ticket from different accounts`, async function(){
         let userInfo = await lottery.viewUserInfoForLotteryId(accounts[0].address, 2, 0, 5);
-
     });
 
         // check claim ticket from different accounts,

@@ -1,12 +1,11 @@
 ### **СТАРТ ЛОТЕРЕИ**
 Новая лотерея стартует функцией
-```
-startLottery(
-uint256 _endTime,
-uint256 _priceTicketInUSDT,
-uint256 _discountDivisor,
-uint256[6] calldata _rewardsBreakdown
-)
+```solidity
+function startLottery(
+    uint256 _endTime,
+    uint256 _priceTicketInUSDT,
+    uint256 _discountDivisor,
+    uint256[6] calldata _rewardsBreakdown)
 ```
 `_rewardsBreakdown`: [250, 375, 625, 1250, 2500, 5000], что соответствует [2, 3, 5, 10, 20, 40]% от общего пула
 распределение выигрыша по количеству угаданных чисел в сумме должно быть 10000. 
@@ -43,7 +42,7 @@ function calculateTotalPriceForBulkTickets(
 ***
 ### **РАСЧЕТ ВЫИГРАННЫХ БИЛЕТОВ И ОТКРЫТИЕ ЛОТЕРЕИ НА ПОЛУЧЕНИЕ ВЫИГРЫША**
 После генерации `RandomResult` для текущей лотереи в контракте `RandomNumberGenerator` 
->`latestLotteryId` == текущей закрытой лотерее.
+>В контракте `RandomNumberGenerator`: `latestLotteryId` == текущей закрытой лотерее.
 
 получаем сгенерированный `randomResult` и рассчитываем на стороне сервера распределение количество билетов 
 и сумму выигрыша по каждому пулу:
@@ -156,7 +155,7 @@ function getBracketsForTickets(ticketsIds, ticketsNumbers, winNumber){
 function viewRewardsForTicketId(
     uint256 _lotteryId,
     uint256 _ticketId,
-    uint32 _bracket
+    uint32 _bracket)
 ```
 Возвращает массив со всеми билетами купленными `address _user` в конкретной `_lotteryId`
 ```solidity

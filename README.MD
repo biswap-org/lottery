@@ -1,4 +1,4 @@
-###**СТАРТ ЛОТЕРЕИ**
+### **СТАРТ ЛОТЕРЕИ**
 Новая лотерея стартует функцией
 ```
 startLottery(
@@ -11,7 +11,7 @@ uint256[6] calldata _rewardsBreakdown
 `_rewardsBreakdown`: [250, 375, 625, 1250, 2500, 5000], что соответствует [2, 3, 5, 10, 20, 40]% от общего пула
 распределение выигрыша по количеству угаданных чисел в сумме должно быть 10000. 
 ***
-###**ПОКУПКА БИЛЕТОВ**
+### **ПОКУПКА БИЛЕТОВ**
 User покупает билеты текущей (`currentLotteryId`) лотереи (`_lottery.status = Open`) 
 транзакцией `buyTickets(uint256 _lotteryId, uint32[] _ticketNumbers)`, 
 
@@ -38,10 +38,10 @@ function calculateTotalPriceForBulkTickets(
 ```
 >Количество билетов за 1 транзакцию не должно превышать `maxNumberTicketsPerBuyOrClaim`.
 ***
-###**ЗАКРЫТИЕ ЛОТЕРЕИ**
+### **ЗАКРЫТИЕ ЛОТЕРЕИ**
 По окончании срока лотереи вызывается функция `closeLottery(uint256 _lotteryId)`
 ***
-###**РАСЧЕТ ВЫИГРАННЫХ БИЛЕТОВ И ОТКРЫТИЕ ЛОТЕРЕИ НА ПОЛУЧЕНИЕ ВЫИГРЫША**
+### **РАСЧЕТ ВЫИГРАННЫХ БИЛЕТОВ И ОТКРЫТИЕ ЛОТЕРЕИ НА ПОЛУЧЕНИЕ ВЫИГРЫША**
 После генерации `RandomResult` для текущей лотереи в контракте `RandomNumberGenerator` 
 >`latestLotteryId` == текущей закрытой лотерее.
 
@@ -108,7 +108,7 @@ drawFinalNumberAndMakeLotteryClaimable(
 ```
 `_autoInjection` ***true*** если не выигранная сумма переносится на следующий розыгрыш. ***false*** - сумма выводится на адрес `treasuryAddress`
 
-###**ПОЛУЧЕНИЕ ВЫИГРЫША**
+### **ПОЛУЧЕНИЕ ВЫИГРЫША**
 пользователем происходит через вызов функции 
 ```solidity
 claimTickets(
@@ -143,7 +143,7 @@ function getBracketsForTickets(ticketsIds, ticketsNumbers, winNumber){
     return winTicketsId;
 }
 ```
-###**ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ**
+### **ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ**
 Возвращает сумму выигрыша для `TicketId` и `bracket`
 ```solidity
 /**

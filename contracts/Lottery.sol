@@ -1386,8 +1386,8 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
      * @notice Update BSW price for lotteryID
      */
     function updateBSWPrice(uint256 _lotteryId) private {
-        uint oldPriceInBSW = _lotteries[_lotteryId].priceTicketInUSDT;
-        uint newPriceInBSW = priceOracle.consult(usdtTokenAddress, oldPriceInBSW, bswTokenAddress);
+        uint oldPriceInBSW = _lotteries[_lotteryId].priceTicketInBSW;
+        uint newPriceInBSW = priceOracle.consult(usdtTokenAddress, _lotteries[_lotteryId].priceTicketInUSDT, bswTokenAddress);
 
         require(chekPriceDifference(newPriceInBSW, oldPriceInBSW, maxDiffPriceUpdate), 'Oracle give invalid price');
         _lotteries[_lotteryId].priceTicketInBSW = newPriceInBSW;

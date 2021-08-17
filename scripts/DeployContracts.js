@@ -55,8 +55,7 @@ async function main() {
     console.log(`Lottery deployed to ${ lotteryAddress }`);
 
     console.log(`Add lottery contract to RNG contract`);
-    tx = await rng.setLotteryAddress(lotteryAddress);
-
+    await rng.setLotteryAddress(lotteryAddress);
 }
 
 main()

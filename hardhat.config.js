@@ -44,12 +44,6 @@ module.exports = {
       gasPrice: 20000000000,
       accounts: {mnemonic: mnemonic}
     },
-    mainnetMatic: {
-      url: "https://rpc-mainnet.maticvigil.com/",
-      chainId: 137,
-      gasPrice: 20000000000,
-      accounts: {mnemonic: mnemonic}
-    },
   },
   solidity: {
     compilers:[
@@ -80,6 +74,6 @@ module.exports = {
     artifacts: "./artifacts"
   },
   mocha: {
-    timeout: 2000000
+    timeout: 200000
   }
 };

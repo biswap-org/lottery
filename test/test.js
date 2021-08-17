@@ -1,6 +1,6 @@
 const { expect } = require(`chai`);
 const { BigNumber } = require("ethers");
-const { ethers, network} = require(`hardhat`);
+const { ethers, network } = require(`hardhat`);
 const {use} = require("chai");
 
 let accounts,owner, bswToken, oracle, rng, lottery;
@@ -105,7 +105,7 @@ describe(`Check start new lottery`, function () {
     it(`Start new lottery`, async function () {
         const timeLastBlock = (await ethers.provider.getBlock(`latest`)).timestamp;
         endTime = timeLastBlock + 14400; //after 4 hours
-        await expect(lottery.startLottery(endTime, priceTicketInUSDT, discountDivisor, rewardsBreakdown)).to.be //(uint256 _endTime, uint256 _priceTicketInUSDT, uint256 _discountDivisor, uint256[6] calldata _rewardsBreakdown})
+        await expect(lottery.startLottery(endTime, priceTicketInUSDT, discountDivisor, rewardsBreakdown)).to.be
             .emit(lottery, 'LotteryOpen');
         console.log(`Lottery start. Current lottery id: `, (await lottery.currentLotteryId()).toString());
     });
@@ -124,7 +124,7 @@ describe(`Check start new lottery`, function () {
     });
 
     it(`Check close lottery`, async function () {
-        await network.provider.send("evm_setNextBlockTimestamp", [endTime + 1]);
+        await network.provider.send(`evm_setNextBlockTimestamp`, [endTime + 1]);
         await expect(lottery.closeLottery(1)).to.be.emit(lottery, `LotteryClose`);
         let randomResult = await rng.viewRandomResult();
         let amountCollectedInBSW = (await lottery.viewLottery(1)).amountCollectedInBSW;
@@ -243,10 +243,9 @@ describe(`Chek start new lottery and inject from previous lottery`, function(){
         let userInfo = await lottery.viewUserInfoForLotteryId(accounts[0].address, 2, 0, 5);
     });
 
-        // check claim ticket from different accounts,
-        // check withdraw injection sum after lottery finished`
+
 //TODO chek claim same ticket 2 times,
-// check withdraw injection sum after lottery finished,
+// check withdraw injection sum after lottery finished (avtoinjection: false),
 // check claim ticket from different accounts,
 // check change burn and competitions fee,
 // chek change price

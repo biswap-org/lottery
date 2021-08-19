@@ -56,6 +56,15 @@ async function main() {
 
     console.log(`Add lottery contract to RNG contract`);
     await rng.setLotteryAddress(lotteryAddress);
+
+    console.log(`Transfer 1 LINK to rng contract`);
+    const abi = [
+        "function balanceOf(address owner) view returns (uint256)",
+        "function transfer(address to, uint amount) returns (bool)"
+    ]
+    let tokenLinkContract = new ethers.Contract(linkTokenAddress, abi, accounts[0]);
+    await tokenLinkContract.transfer(rngAddress, `1000000000000000000`);
+
 }
 
 main()

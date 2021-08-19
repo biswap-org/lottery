@@ -1,6 +1,7 @@
 require("@nomiclabs/hardhat-waffle");
 require('@nomiclabs/hardhat-ethers');
-const { mnemonic } = require('./secrets.json');
+require("@nomiclabs/hardhat-etherscan");
+const { mnemonic, bscScanApiKey } = require('./secrets.json');
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -25,6 +26,7 @@ module.exports = {
       url: "http://127.0.0.1:8545"
     },
     hardhat: {
+      blockGasLimit: 99999999
     },
     testnetBSC: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
@@ -44,6 +46,9 @@ module.exports = {
       gasPrice: 20000000000,
       accounts: {mnemonic: mnemonic}
     },
+  },
+  etherscan: {
+    apiKey: bscScanApiKey
   },
   solidity: {
     compilers:[

@@ -111,7 +111,7 @@ describe(`Check start new lottery`, function () {
     });
 
     it(`Buy tickets and check transfers amounts`, async function () {
-        //                  1853548  1853548  1853548 1903507
+        //                  1853548  1853548  1853548 1903507 1279708
         ticketsNumbers = [1275708, 1379708, 1219701, 1271608, 1279101, 1279101];
         let currentPriceInBSW = await lottery.getCurrentTicketPriceInBSW(lottery.currentLotteryId());
         let balanceLotteryBefore = await bswToken.balanceOf(lottery.address);
@@ -159,7 +159,7 @@ describe(`Check start new lottery`, function () {
         let brackets = getBracketsForTickets(ticketsIds, ticketsNumbers, finalNumber);
         let winTicketId = Array.from(brackets.keys());
         let winBrackets = Array.from(brackets.values());
-
+        console.log(winTicketId.toString(), winBrackets);
         await lottery.claimTickets(1, winTicketId, winBrackets);
         expect(await bswToken.balanceOf(lottery.address)).equal(await lottery.pendingInjectionNextLottery());
     });

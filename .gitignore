@@ -3,4 +3,6 @@
 secrets.json
 /cache/
 /artifacts/
+_README.MD
 README.MD
+.DS_STORE

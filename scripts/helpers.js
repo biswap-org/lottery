@@ -16,11 +16,14 @@ const PRICE_TICKET_IN_USDT = BigNumber.from(`1000000000000000000`);
 const REWARDS_BREAKDOWN = [250, 375, 625, 1250, 2500, 5000];
 const DISCOUNT_DIVISOR = 10000;
 
-let web3 = new Web3(`https://bsc-dataseed.binance.org/`);
-// let web3 = new Web3(`https://data-seed-prebsc-1-s1.binance.org:8545`); //Testnet
-// let web3 = new Web3(`http://127.0.0.1:8545`); //Localhost
+const EXPECTED_BLOCK_TIME = 3000;
+
+const web3 = new Web3(`https://bsc-dataseed.binance.org/`);
+// const web3 = new Web3(`https://data-seed-prebsc-1-s1.binance.org:8545`); //Testnet
+// const web3 = new Web3(`http://127.0.0.1:8545`); //Localhost
 const lotteryAbi = require(`../artifacts/contracts/Lottery.sol/BiswapLottery.json`);
 const RngAbi = require(`../artifacts/contracts/RandomNumberGenerator.sol/RandomNumberGenerator.json`);
+
 
 //arg:
 // 1 `Start new lottery`;
@@ -29,8 +32,8 @@ const RngAbi = require(`../artifacts/contracts/RandomNumberGenerator.sol/RandomN
 async function main(arg){
     const account = web3.eth.accounts.privateKeyToAccount(privatKey);
     web3.eth.accounts.wallet.add(account);
-    const lottery = new web3.eth.Contract(lotteryAbi.abi, LOTTERY_ADDRESS, account.address);
-    const rng = new web3.eth.Contract(RngAbi.abi, RNG_ADDRESS);
+    const lottery = new web3.eth.Contract(lotteryAbi.abi, LOTTERY_ADDRESS, {from: account.address});
+    const rng = new web3.eth.Contract(RngAbi.abi, RNG_ADDRESS, {from: account.address});
     const timeLastBlock = (await web3.eth.getBlock('latest')).timestamp;
     let currentLotteryId = await lottery.methods.viewCurrentLotteryId().call();
     let currentLottery = (await lottery.methods.viewLottery(currentLotteryId).call());
@@ -49,7 +52,6 @@ async function main(arg){
             .on('receipt', function(receipt){
                 console.log(`New lottery successfully started`, receipt.events);
             });
-        // console.log(`New lottery successfully started: ${event}`);
     } else if(arg === 1){
         console.log(`Current status lottery not close or claimable. Its: ${currentStatusLottery}`)
     }
@@ -71,14 +73,11 @@ async function main(arg){
         console.log(`Current status lottery not Open. Its: ${currentStatusLottery}`);
     }
 
-    //--- draw final number and make Lottery claimable
+    //TODO --- draw final number and make Lottery claimable
     //Current status lottery `Close`
-    if(currentStatusLottery === 2 && arg === 3){
-
-    }
-
-    // console.log(await lottery.methods.viewCurrentLotteryId().call({from: account.address, gas: 1000000}));
-    // console.log((await web3.eth.getBlock('latest')).timestamp)
+    // if(currentStatusLottery === 2 && arg === 3){
+    //
+    // }
 }
 
 main(1)

@@ -1,7 +1,6 @@
 // npx hardhat run scripts/deployContracts.js --network testnetBSC
 // const config = require(`../config.json`);
 const { ethers, network } = require(`hardhat`);
-const {BigNumber} = require("ethers");
 
 let vrfCoordinatorAddress, linkTokenAddress, keyHash, bswTokenAddress, usdtTokenAddress, priceOracleAddress;
 
@@ -66,6 +65,10 @@ async function main() {
 
     console.log(`Add lottery contract to RNG contract`);
     await rng.setLotteryAddress(lotteryAddress);
+
+    console.log(`Setting managing addresses`);
+    await lottery.setManagingAddresses(accounts[0].address, accounts[0].address, accounts[0].address, accounts[0].address, accounts[0].address);
+
 
     if (network.name === `localhost`){
         console.log(`Transfer 1 LINK to rng contract`);

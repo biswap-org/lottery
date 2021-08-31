@@ -16,7 +16,6 @@ const PRICE_TICKET_IN_USDT = BigNumber.from(`1000000000000000000`);
 const REWARDS_BREAKDOWN = [250, 375, 625, 1250, 2500, 5000];
 const DISCOUNT_DIVISOR = 10000;
 
-const EXPECTED_BLOCK_TIME = 3000;
 
 const web3 = new Web3(`https://bsc-dataseed.binance.org/`);
 // const web3 = new Web3(`https://data-seed-prebsc-1-s1.binance.org:8545`); //Testnet
@@ -24,12 +23,12 @@ const web3 = new Web3(`https://bsc-dataseed.binance.org/`);
 const lotteryAbi = require(`../artifacts/contracts/Lottery.sol/BiswapLottery.json`);
 const RngAbi = require(`../artifacts/contracts/RandomNumberGenerator.sol/RandomNumberGenerator.json`);
 
-
-//arg:
-// 1 `Start new lottery`;
-// 2 `Close current lottery`;
-// 3 `Draw final number and make Lottery claimable`
-async function main(arg){
+const argv1 = process.argv.slice(2)[0];
+//argv1:
+// --open `Start new lottery`;
+// --close `Close current lottery`;
+// --draw `Draw final number and make Lottery claimable`
+async function main(){
     const account = web3.eth.accounts.privateKeyToAccount(privatKey);
     web3.eth.accounts.wallet.add(account);
     const lottery = new web3.eth.Contract(lotteryAbi.abi, LOTTERY_ADDRESS, {from: account.address});
@@ -38,13 +37,10 @@ async function main(arg){
     let currentLotteryId = await lottery.methods.viewCurrentLotteryId().call();
     let currentLottery = (await lottery.methods.viewLottery(currentLotteryId).call());
     let currentStatusLottery = currentLottery.status;
-    console.log(`Setting managing addresses`);
-    await lottery.methods.setManagingAddresses(account.address, account.address, account.address, account.address, account.address)
-        .send({from: account.address, gas: 1000000});
 
     //--- start new lottery
     //Current lottery status == `close` or `claimable`
-    if (currentStatusLottery !== `1` && arg === 1){
+    if (currentStatusLottery !== `1` && argv1 === '--open'){
         console.log(`Lets start new lottery`);
         let endTime = timeLastBlock + LOTTERY_DURATION;
         await lottery.methods.startLottery(endTime, PRICE_TICKET_IN_USDT, DISCOUNT_DIVISOR, REWARDS_BREAKDOWN)
@@ -52,35 +48,36 @@ async function main(arg){
             .on('receipt', function(receipt){
                 console.log(`New lottery successfully started`, receipt.events);
             });
-    } else if(arg === 1){
+    } else if(argv1 === '--open'){
         console.log(`Current status lottery not close or claimable. Its: ${currentStatusLottery}`)
     }
 
     //--- close lottery
     //Current status lottery == `Open`
-    if(currentStatusLottery === `1` && arg === 2){
+    if(currentStatusLottery === `1` && argv1 === '--close'){
         console.log(`Try to close current lottery`);
         if (currentLottery.endTime === 0 || currentLottery.endTime > timeLastBlock){
             console.log(`Current lottery not over. Current timestamp: ${timeLastBlock} End Timestamp: ${currentLottery.endTime}`)
         } else{
             let receipt = await lottery.methods.closeLottery(currentLotteryId)
-                .send({from: account.address, gas: 1000000})
+                .send({from: account.address, gas: 10000000})
                 .on('receipt', function(receipt){
                     console.log(`Lottery ${currentLotteryId} successfully closed`, receipt.events);
                 });
         }
-    } else if(arg === 2){
+    } else if(argv1 === '--close'){
         console.log(`Current status lottery not Open. Its: ${currentStatusLottery}`);
     }
 
     //TODO --- draw final number and make Lottery claimable
     //Current status lottery `Close`
-    // if(currentStatusLottery === 2 && arg === 3){
-    //
-    // }
+    if(currentStatusLottery === 2 && argv1 === `--draw`){
+
+    }
 }
 
-main(1)
+
+main()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);

@@ -78,9 +78,9 @@ async function main(){
     } else if(argv1 === '--close'){
         console.log(`Current status lottery not Open. Its: ${currentStatusLottery}`);
     }
-
+    //--- draw final number and make lottery claimable
     //Current status lottery `Close`
-    if(/*currentStatusLottery === 2 && */ argv1 === `--draw`){
+    if(currentStatusLottery === 2 &&  argv1 === `--draw`){
         let autoInjection = true;
         let amountCollectedInBSW = currentLottery.amountCollectedInBSW;
         let firstTicketId = currentLottery.firstTicketId;

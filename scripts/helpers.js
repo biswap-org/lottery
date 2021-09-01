@@ -93,7 +93,7 @@ async function main(){
     if(currentStatusLottery === `2` && argv1 === `--draw`){
         console.log(`Try to draw final number and make lottery claimable`);
         let autoInjection = true;
-        let amountCollectedInBSW = currentLottery.amountCollectedInBSW;
+        let amountCollectedInBSW = new BigNumber.from(currentLottery.amountCollectedInBSW);
         let firstTicketId = currentLottery.firstTicketId;
         let lastTicketId = currentLottery.firstTicketIdNextLottery;
         let totalTicketsPerLottery = lastTicketId - firstTicketId;
@@ -108,12 +108,12 @@ async function main(){
             return;
         }
         let randomResult = await rng.methods.viewRandomResult().call();
-        let amountToDistribute = (amountCollectedInBSW -
-            (amountCollectedInBSW / 10000 * (+burningShare + +competitionAndRefShare)) +
-            (await lottery.methods.pendingInjectionNextLottery().call()))
+        let pendingInjectionNextLottery = new BigNumber.from(await lottery.methods.pendingInjectionNextLottery().call())
+        let amountToDistribute = amountCollectedInBSW
+            .sub((amountCollectedInBSW).div(10000).mul(+burningShare + +competitionAndRefShare))
+            .add(pendingInjectionNextLottery);
         let calculateBrackets =
-            getCountTicketsOnBrackets(ticketsNumbers, randomResult, rewardsBreakdown, new BigNumber.from(amountToDistribute));
-
+            getCountTicketsOnBrackets(ticketsNumbers, randomResult, rewardsBreakdown, amountToDistribute);
         await lottery.methods.drawFinalNumberAndMakeLotteryClaimable(currentLotteryId, calculateBrackets[0], calculateBrackets[1], autoInjection)
             .send({from: account.address, gas: 1000000})
             .on('receipt', function(receipt){

@@ -35,8 +35,10 @@ async function main(){
     const rng = new web3.eth.Contract(RngAbi.abi, RNG_ADDRESS, {from: account.address});
     const timeLastBlock = (await web3.eth.getBlock('latest')).timestamp;
     let currentLotteryId = await lottery.methods.viewCurrentLotteryId().call();
-    let currentLottery = (await lottery.methods.viewLottery(currentLotteryId).call());
+    let currentLottery = await lottery.methods.viewLottery(currentLotteryId).call();
     let currentStatusLottery = currentLottery.status;
+    let burningShare = await lottery.methods.burningShare().call();
+    let competitionAndRefShare = await lottery.methods.competitionAndRefShare().call();
 
     //--- start new lottery
     //Current lottery status == `close` or `claimable`
@@ -46,7 +48,11 @@ async function main(){
         await lottery.methods.startLottery(endTime, PRICE_TICKET_IN_USDT, DISCOUNT_DIVISOR, REWARDS_BREAKDOWN)
             .send({from: account.address, gas: 1000000})
             .on('receipt', function(receipt){
-                console.log(`New lottery successfully started`, receipt.events);
+                if(receipt.status === true) {
+                    console.log(`New lottery successfully started`, receipt.events);
+                } else {
+                    console.log(`Lottery start False!!!. txHash: ${receipt.transactionHash}`);
+                }
             });
     } else if(argv1 === '--open'){
         console.log(`Current status lottery not close or claimable. Its: ${currentStatusLottery}`)
@@ -59,21 +65,93 @@ async function main(){
         if (currentLottery.endTime === 0 || currentLottery.endTime > timeLastBlock){
             console.log(`Current lottery not over. Current timestamp: ${timeLastBlock} End Timestamp: ${currentLottery.endTime}`)
         } else{
-            let receipt = await lottery.methods.closeLottery(currentLotteryId)
+            await lottery.methods.closeLottery(currentLotteryId)
                 .send({from: account.address, gas: 10000000})
                 .on('receipt', function(receipt){
-                    console.log(`Lottery ${currentLotteryId} successfully closed`, receipt.events);
+                    if(receipt.status === true) {
+                        console.log(`Lottery ${currentLotteryId} successfully closed`, receipt.events);
+                    } else {
+                        console.log(`Lottery close False!!!. txHash: ${receipt.transactionHash}`);
+                    }
                 });
         }
     } else if(argv1 === '--close'){
         console.log(`Current status lottery not Open. Its: ${currentStatusLottery}`);
     }
 
-    //TODO --- draw final number and make Lottery claimable
     //Current status lottery `Close`
-    if(currentStatusLottery === 2 && argv1 === `--draw`){
+    if(/*currentStatusLottery === 2 && */ argv1 === `--draw`){
+        let autoInjection = true;
+        let amountCollectedInBSW = currentLottery.amountCollectedInBSW;
+        let firstTicketId = currentLottery.firstTicketId;
+        let lastTicketId = currentLottery.firstTicketIdNextLottery;
+        let totalTicketsPerLottery = lastTicketId - firstTicketId;
+        let rewardsBreakdown = currentLottery.rewardsBreakdown;
+        let ticketIdsForCurLottery =
+            (function(a,b,c){c=[];while(a--)c[a]=a+b;return c})(totalTicketsPerLottery,firstTicketId);
+        let ticketsNumbers = (await lottery.methods.viewNumbersAndStatusesForTicketIds(ticketIdsForCurLottery).call())[0];
+        let currentLotteryIdInRng = await rng.methods.viewLatestLotteryId().call();
 
+        if(currentLotteryIdInRng !== currentLotteryId){
+            console.log(`In RNG contract random number for this lottery not ready. ${currentLotteryIdInRng}`);
+            // return;
+        }
+        let randomResult = await rng.methods.viewRandomResult().call();
+        console.log(`amountCollectedInBSW`, amountCollectedInBSW)
+        let amountToDistribute = (amountCollectedInBSW -
+            (amountCollectedInBSW / 10000 * (+burningShare + +competitionAndRefShare)) +
+            (await lottery.methods.pendingInjectionNextLottery().call()))
+        let calculateBrackets =
+            getCountTicketsOnBrackets(ticketsNumbers, randomResult, rewardsBreakdown, amountToDistribute);
+
+        await lottery.methods.drawFinalNumberAndMakeLotteryClaimable(currentLotteryId, calculateBrackets[0], calculateBrackets[1], autoInjection)
+            .send({from: account.address, gas: 1000000})
+            .on('receipt', function(receipt){
+                if(receipt.status === true){
+                    console.log(`Lottery successfully drowned `, receipt.events);
+                } else{
+                    console.log(`Draw final number False!!!. txHash: ${receipt.transactionHash}`);
+                }
+            });
     }
+}
+
+function getCountTicketsOnBrackets(ticketsNumbers, winningNumber, rewardsBreakdown, amountCollectedInBSW) {
+    let bswPerBracket = [];
+    let countTicketsPerBracket = [];
+    let ticketsOnBrackets = new Map();
+    let amountToInjectNextLottery = new BigNumber.from(0);
+    ticketsOnBrackets.constructor.prototype.increment = function (key) {
+        this.has(key) ? this.set(key, this.get(key) + 1) : this.set(key, 1);
+    }
+    for (let i = 0; i < ticketsNumbers.length; i++) {
+        if (ticketsNumbers[i] < 1000000 || ticketsNumbers[i] > 1999999) {
+            console.log('Wrong ticket number', ticketsNumbers[i]);
+            return 0;
+        }
+        for (let j = 0; j < 6; j++) {
+            ticketsOnBrackets.increment(bracketCalculator[j] + ticketsNumbers[i] % 10 ** (j + 1));
+        }
+    }
+    let previousCount = 0;
+    for (let i = 5; i >= 0; i--) {
+        let transfWinningNumber = bracketCalculator[i] + (winningNumber % 10 ** (i + 1));
+        countTicketsPerBracket[i] = (ticketsOnBrackets.get(transfWinningNumber) - previousCount) || 0;
+
+        if (countTicketsPerBracket[i] > 0) {
+            if (rewardsBreakdown[i] > 0) {
+                bswPerBracket[i] = (((amountCollectedInBSW.mul(rewardsBreakdown[i])).div(countTicketsPerBracket[i]))
+                    .div(10000))
+                    .add(1); // To Warn correct rounding when infinite fraction
+                previousCount = ticketsOnBrackets.get(transfWinningNumber);
+            }
+        } else {
+            bswPerBracket[i] = 0;
+            amountToInjectNextLottery = amountToInjectNextLottery
+                .add((amountCollectedInBSW.mul(rewardsBreakdown[i])).div(10000))
+        }
+    }
+    return [bswPerBracket, countTicketsPerBracket, amountToInjectNextLottery];
 }
 
 

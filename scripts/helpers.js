@@ -12,7 +12,7 @@ const RNG_ADDRESS = `0x16398AAf8587e237cb3F6F5b4eA058b3EdE86419`;
 // const LOTTERY_ADDRESS = '0xccE260AfcACB58c79d0dE54f9D19cF94ECf94C9A'; //TestNet
 // const RNG_ADDRESS = `0xD7DF6d2b1FD1E9Cf1C75BC4068AC3fb67e376D47`; //TestNet
 const LOTTERY_DURATION = 14400; // 4 hours
-const PRICE_TICKET_IN_USDT = BigNumber.from(`1000000000000000000`);
+const PRICE_TICKET_IN_USDT = BigNumber.from(`1000000000000000`); //Min price 1000000000000
 const REWARDS_BREAKDOWN = [250, 375, 625, 1250, 2500, 5000];
 const DISCOUNT_DIVISOR = 10000;
 
@@ -24,6 +24,16 @@ const lotteryAbi = require(`../artifacts/contracts/Lottery.sol/BiswapLottery.jso
 const RngAbi = require(`../artifacts/contracts/RandomNumberGenerator.sol/RandomNumberGenerator.json`);
 
 const argv1 = process.argv.slice(2)[0];
+
+let bracketCalculator = [];
+bracketCalculator[0] = 1;
+bracketCalculator[1] = 11;
+bracketCalculator[2] = 111;
+bracketCalculator[3] = 1111;
+bracketCalculator[4] = 11111;
+bracketCalculator[5] = 111111;
+
+
 //argv1:
 // --open `Start new lottery`;
 // --close `Close current lottery`;
@@ -66,7 +76,7 @@ async function main(){
             console.log(`Current lottery not over. Current timestamp: ${timeLastBlock} End Timestamp: ${currentLottery.endTime}`)
         } else{
             await lottery.methods.closeLottery(currentLotteryId)
-                .send({from: account.address, gas: 10000000})
+                .send({from: account.address, gas: 1000000})
                 .on('receipt', function(receipt){
                     if(receipt.status === true) {
                         console.log(`Lottery ${currentLotteryId} successfully closed`, receipt.events);
@@ -80,7 +90,8 @@ async function main(){
     }
     //--- draw final number and make lottery claimable
     //Current status lottery `Close`
-    if(currentStatusLottery === 2 &&  argv1 === `--draw`){
+    if(currentStatusLottery === `2` && argv1 === `--draw`){
+        console.log(`Try to draw final number and make lottery claimable`);
         let autoInjection = true;
         let amountCollectedInBSW = currentLottery.amountCollectedInBSW;
         let firstTicketId = currentLottery.firstTicketId;
@@ -94,15 +105,14 @@ async function main(){
 
         if(currentLotteryIdInRng !== currentLotteryId){
             console.log(`In RNG contract random number for this lottery not ready. ${currentLotteryIdInRng}`);
-            // return;
+            return;
         }
         let randomResult = await rng.methods.viewRandomResult().call();
-        console.log(`amountCollectedInBSW`, amountCollectedInBSW)
         let amountToDistribute = (amountCollectedInBSW -
             (amountCollectedInBSW / 10000 * (+burningShare + +competitionAndRefShare)) +
             (await lottery.methods.pendingInjectionNextLottery().call()))
         let calculateBrackets =
-            getCountTicketsOnBrackets(ticketsNumbers, randomResult, rewardsBreakdown, amountToDistribute);
+            getCountTicketsOnBrackets(ticketsNumbers, randomResult, rewardsBreakdown, new BigNumber.from(amountToDistribute));
 
         await lottery.methods.drawFinalNumberAndMakeLotteryClaimable(currentLotteryId, calculateBrackets[0], calculateBrackets[1], autoInjection)
             .send({from: account.address, gas: 1000000})
@@ -110,7 +120,7 @@ async function main(){
                 if(receipt.status === true){
                     console.log(`Lottery successfully drowned `, receipt.events);
                 } else{
-                    console.log(`Draw final number False!!!. txHash: ${receipt.transactionHash}`);
+                    console.log(`Draw lottery False!!!. txHash: ${receipt.transactionHash}`);
                 }
             });
     }

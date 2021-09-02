@@ -99,8 +99,9 @@ async function main(){
         let totalTicketsPerLottery = lastTicketId - firstTicketId;
         let rewardsBreakdown = currentLottery.rewardsBreakdown;
         let ticketIdsForCurLottery =
-            (function(a,b,c){c=[];while(a--)c[a]=a+b;return c})(totalTicketsPerLottery,firstTicketId);
+            (function(a,b,c){c=[];while(a--)c[a]=a+b;return c})(+totalTicketsPerLottery, +firstTicketId);
         let ticketsNumbers = (await lottery.methods.viewNumbersAndStatusesForTicketIds(ticketIdsForCurLottery).call())[0];
+
         let currentLotteryIdInRng = await rng.methods.viewLatestLotteryId().call();
 
         if(currentLotteryIdInRng !== currentLotteryId){

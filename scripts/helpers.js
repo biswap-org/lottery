@@ -7,11 +7,11 @@ const Web3 = require(`web3`);
 const { privatKey, PK_local, privatKey_acc1 } = require('../secrets.json');
 
 
-const LOTTERY_ADDRESS = '0x825964Ac329A7Efefb895E83Af0615F68558Abe9';
-const RNG_ADDRESS = `0x16398AAf8587e237cb3F6F5b4eA058b3EdE86419`;
+const LOTTERY_ADDRESS = '0x0833D85674E78127b022aE0B1a33A9d0cb4dc4fa';
+const RNG_ADDRESS = `0xCfC6F620226d4Bf792E536D5cc189A6443e2b2BD`;
 // const LOTTERY_ADDRESS = '0xccE260AfcACB58c79d0dE54f9D19cF94ECf94C9A'; //TestNet
 // const RNG_ADDRESS = `0xD7DF6d2b1FD1E9Cf1C75BC4068AC3fb67e376D47`; //TestNet
-const LOTTERY_DURATION = 14400; // 4 hours
+const LOTTERY_DURATION = 600; // 4 hours
 const PRICE_TICKET_IN_USDT = BigNumber.from(`1000000000000000`); //Min price 1000000000000
 const REWARDS_BREAKDOWN = [250, 375, 625, 1250, 2500, 5000];
 const DISCOUNT_DIVISOR = 10000;
@@ -111,10 +111,12 @@ async function main(){
         let randomResult = await rng.methods.viewRandomResult().call();
         let pendingInjectionNextLottery = new BigNumber.from(await lottery.methods.pendingInjectionNextLottery().call())
         let amountToDistribute = amountCollectedInBSW
-            .sub((amountCollectedInBSW).div(10000).mul(+burningShare + +competitionAndRefShare))
+            .sub((amountCollectedInBSW).mul(+burningShare + +competitionAndRefShare).div(10000))
             .add(pendingInjectionNextLottery);
         let calculateBrackets =
             getCountTicketsOnBrackets(ticketsNumbers, randomResult, rewardsBreakdown, amountToDistribute);
+        console.log(amountToDistribute.toString(), amountCollectedInBSW.toString())
+        console.log(currentLotteryId, calculateBrackets[0].toString(), calculateBrackets[1], autoInjection);
         await lottery.methods.drawFinalNumberAndMakeLotteryClaimable(currentLotteryId, calculateBrackets[0], calculateBrackets[1], autoInjection)
             .send({from: account.address, gas: 1000000})
             .on('receipt', function(receipt){
@@ -153,7 +155,7 @@ function getCountTicketsOnBrackets(ticketsNumbers, winningNumber, rewardsBreakdo
             if (rewardsBreakdown[i] > 0) {
                 bswPerBracket[i] = (((amountCollectedInBSW.mul(rewardsBreakdown[i])).div(countTicketsPerBracket[i]))
                     .div(10000))
-                    .add(1); // To Warn correct rounding when infinite fraction
+                    .sub(1); // To Warn correct rounding when infinite fraction
                 previousCount = ticketsOnBrackets.get(transfWinningNumber);
             }
         } else {

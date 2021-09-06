@@ -115,8 +115,6 @@ async function main(){
             .add(pendingInjectionNextLottery);
         let calculateBrackets =
             getCountTicketsOnBrackets(ticketsNumbers, randomResult, rewardsBreakdown, amountToDistribute);
-        console.log(amountToDistribute.toString(), amountCollectedInBSW.toString())
-        console.log(currentLotteryId, calculateBrackets[0].toString(), calculateBrackets[1], autoInjection);
         await lottery.methods.drawFinalNumberAndMakeLotteryClaimable(currentLotteryId, calculateBrackets[0], calculateBrackets[1], autoInjection)
             .send({from: account.address, gas: 1000000})
             .on('receipt', function(receipt){

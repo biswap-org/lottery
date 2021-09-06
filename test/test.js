@@ -84,7 +84,7 @@ function getCountTicketsOnBrackets(ticketsNumbers, winningNumber, rewardsBreakdo
             if(rewardsBreakdown[i] > 0){
                 bswPerBracket[i] = (((amountCollectedInBSW.mul(rewardsBreakdown[i])).div(countTicketsPerBracket[i]))
                     .div(10000))
-                    .add(1); // To Warn correct rounding when infinite fraction
+                    .sub(1); // To Warn correct rounding when infinite fraction
                 previousCount = ticketsOnBrackets.get(transfWinningNumber);
             }
         } else {

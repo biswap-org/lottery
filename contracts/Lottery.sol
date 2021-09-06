@@ -6,8 +6,8 @@
 // File: @openzeppelin/contracts/utils/Context.sol
 
 // SPDX-License-Identifier: MIT
-
-pragma solidity ^0.8.0;
+//LBC-01
+pragma solidity 0.8.4;
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -31,8 +31,8 @@ abstract contract Context {
 }
 
 // File: @openzeppelin/contracts/access/Ownable.sol
-
-pragma solidity ^0.8.0;
+//LBC-01
+pragma solidity 0.8.4;
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -99,8 +99,8 @@ abstract contract Ownable is Context {
 }
 
 // File: @openzeppelin/contracts/security/ReentrancyGuard.sol
-
-pragma solidity ^0.8.0;
+//LBC-01
+pragma solidity 0.8.4;
 
 /**
  * @dev Contract module that helps prevent reentrant calls to a function.
@@ -162,8 +162,8 @@ abstract contract ReentrancyGuard {
 }
 
 // File: @openzeppelin/contracts/token/ERC20/IERC20.sol
-
-pragma solidity ^0.8.0;
+//LBC-01
+pragma solidity 0.8.4;
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
@@ -244,8 +244,8 @@ interface IERC20 {
 }
 
 // File: @openzeppelin/contracts/utils/Address.sol
-
-pragma solidity ^0.8.0;
+//LBC-01
+pragma solidity 0.8.4;
 
 /**
  * @dev Collection of functions related to the address type
@@ -461,8 +461,8 @@ library Address {
 }
 
 // File: @openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
-
-pragma solidity ^0.8.0;
+//LBC-01
+pragma solidity 0.8.4;
 
 /**
  * @title SafeERC20
@@ -559,8 +559,8 @@ library SafeERC20 {
 }
 
 // File: contracts/interfaces/IRandomNumberGenerator.sol
-
-pragma solidity ^0.8.4;
+//LBC-01
+pragma solidity 0.8.4;
 
 interface IRandomNumberGenerator {
     /**
@@ -580,8 +580,8 @@ interface IRandomNumberGenerator {
 }
 
 //Price Oracle interface
-
-pragma solidity ^0.8.0;
+//LBC-01
+pragma solidity 0.8.4;
 
 interface IPriceOracle {
     struct Observation {
@@ -595,8 +595,8 @@ interface IPriceOracle {
 }
 
 // File: contracts/interfaces/IBiswapLottery.sol
-
-pragma solidity ^0.8.4;
+//LBC-01
+pragma solidity 0.8.4;
 
 interface IBiswapLottery {
     /**
@@ -674,8 +674,8 @@ interface IBiswapLottery {
 }
 
 // File: contracts/BiswapLottery.sol
-
-pragma solidity ^0.8.4;
+//LBC-01
+pragma solidity 0.8.4;
 pragma abicoder v2;
 
 /** @title Biswap Lottery.
@@ -707,7 +707,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
 
     uint256 public pendingInjectionNextLottery;
 
-    uint256 public constant MIN_DISCOUNT_DIVISOR = 300;
+    uint256 public constant MIN_DISCOUNT_DIVISOR = 500;
     uint256 public constant MIN_LENGTH_LOTTERY = 4 hours - 5 minutes; // 4 hours
     uint256 public constant MAX_LENGTH_LOTTERY = 4 days + 5 minutes; // 4 days
 
@@ -749,7 +749,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     mapping(uint256 => Ticket) private _tickets;
 
     // Bracket calculator is used for verifying claims for ticket prizes
-    mapping(uint32 => uint32) private _bracketCalculator;
+    //LBC-07
 
     // Keep track of user ticket ids for a given lotteryId
     mapping(address => mapping(uint256 => uint256[])) private _userTicketIdsPerLotteryId;
@@ -808,19 +808,16 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         address _randomGeneratorAddress,
         address _priceOracleAddress
     ) {
+        //LBC-03
+        require(_bswTokenAddress != address(0), "_bswTokenAddress address cannot be 0");
+        require(_usdtTokenAddress != address(0), "_usdtTokenAddress address cannot be 0");
         bswToken = IERC20(_bswTokenAddress);
         bswTokenAddress = _bswTokenAddress;
         usdtTokenAddress = _usdtTokenAddress;
         randomGenerator = IRandomNumberGenerator(_randomGeneratorAddress);
         priceOracle = IPriceOracle(_priceOracleAddress);
 
-        // Initializes a mapping
-        _bracketCalculator[0] = 1;
-        _bracketCalculator[1] = 11;
-        _bracketCalculator[2] = 111;
-        _bracketCalculator[3] = 1111;
-        _bracketCalculator[4] = 11111;
-        _bracketCalculator[5] = 111111;
+        //LBC-07
     }
 
     /**
@@ -993,15 +990,15 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         for (uint i = 0; i < 6; i++){
             uint winningPoolPerBracket = _bswPerBracket[i] * _countTicketsPerBracket[i];
             ticketsCountPerBrackets += _countTicketsPerBracket[i];
+            //LBC-06
             if(_countTicketsPerBracket[i] > 0){
                 require(
-                    winningPoolPerBracket >= (_lotteries[_lotteryId].rewardsBreakdown[i] * amountToDistribute) / 10000,
+                    winningPoolPerBracket <= (_lotteries[_lotteryId].rewardsBreakdown[i] * amountToDistribute) / 10000,
                     'Wrong amount on bracket'
                 );
             }
             bswSumPerBrackets += winningPoolPerBracket;
         }
-
         require(bswSumPerBrackets <= amountToDistribute, 'Wrong brackets Total amount');
 
         _lotteries[_lotteryId].bswPerBracket = _bswPerBracket;
@@ -1064,9 +1061,9 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
      */
     function injectFunds(uint256 _lotteryId, uint256 _amount) external override onlyOwnerOrInjector {
         require(_lotteries[_lotteryId].status == Status.Open, "Lottery not open");
-
-        bswToken.safeTransferFrom(address(msg.sender), address(this), _amount);
+        //LBC-02
         _lotteries[_lotteryId].amountCollectedInBSW += _amount;
+        bswToken.safeTransferFrom(address(msg.sender), address(this), _amount);
 
         emit LotteryInjection(_lotteryId, _amount);
     }
@@ -1178,6 +1175,8 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
      */
     function setMaxNumberTicketsPerBuy(uint256 _maxNumberTicketsPerBuy) external onlyOwner {
         require(_maxNumberTicketsPerBuy != 0, "Must be > 0");
+        //LBC-04
+        require(_maxNumberTicketsPerBuy <= MIN_DISCOUNT_DIVISOR, "Must be less than MIN_DISCOUNT_DIVISOR");
         maxNumberTicketsPerBuyOrClaim = _maxNumberTicketsPerBuy;
     }
 
@@ -1249,8 +1248,10 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         uint256 _priceTicket,
         uint256 _numberTickets
     ) external pure returns (uint256) {
-        require(_discountDivisor >= MIN_DISCOUNT_DIVISOR, "Must be >= MIN_DISCOUNT_DIVISOR");
+        require(_discountDivisor >= MIN_DISCOUNT_DIVISOR, "discountDivisor must be >= MIN_DISCOUNT_DIVISOR");
         require(_numberTickets != 0, "Number of tickets must be > 0");
+        //LBC-08
+        require(_numberTickets < _discountDivisor + 1, "numberTickets must be < discountDivisor + 1");
 
         return _calculateTotalPriceForBulkTickets(_discountDivisor, _priceTicket, _numberTickets);
     }
@@ -1313,8 +1314,9 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
             }
 
         // Check ticketId is within range
+        //LBC-09
         if (
-            (_lotteries[_lotteryId].firstTicketIdNextLottery < _ticketId) &&
+            (_lotteries[_lotteryId].firstTicketIdNextLottery < _ticketId) ||
             (_lotteries[_lotteryId].firstTicketId >= _ticketId)
         ){
             return 0;
@@ -1424,16 +1426,17 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         uint32 _bracket
     ) internal view returns (uint256) {
         // Retrieve the winning number combination
-        uint32 userNumber = _lotteries[_lotteryId].finalNumber;
+        //LBC-10
+        uint32 winningTicketNumber = _lotteries[_lotteryId].finalNumber;
 
         // Retrieve the user number combination from the ticketId
-        uint32 winningTicketNumber = _tickets[_ticketId].number;
+        uint32 userNumber= _tickets[_ticketId].number;
 
         // Apply transformation to verify the claim provided by the user is true
-        uint32 transformedWinningNumber = _bracketCalculator[_bracket] +
-        (winningTicketNumber % (uint32(10)**(_bracket + 1)));
-
-        uint32 transformedUserNumber = _bracketCalculator[_bracket] + (userNumber % (uint32(10)**(_bracket + 1)));
+        //LBC-07
+        uint32 transformedWinningNumber = (winningTicketNumber % (uint32(10)**(_bracket + 1)));
+        //LBC-07
+        uint32 transformedUserNumber = (userNumber % (uint32(10)**(_bracket + 1)));
 
         // Confirm that the two transformed numbers are the same, if not throw
         if (transformedWinningNumber == transformedUserNumber) {

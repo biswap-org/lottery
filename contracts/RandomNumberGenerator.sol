@@ -5,8 +5,8 @@
 // File: @openzeppelin/contracts/utils/Context.sol
 
 // SPDX-License-Identifier: MIT
-
-pragma solidity ^0.8.0;
+//RNG-01
+pragma solidity 0.8.4;
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -30,8 +30,8 @@ abstract contract Context {
 }
 
 // File: @openzeppelin/contracts/access/Ownable.sol
-
-pragma solidity ^0.8.0;
+//RNG-01
+pragma solidity 0.8.4;
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -98,8 +98,8 @@ abstract contract Ownable is Context {
 }
 
 // File: @openzeppelin/contracts/token/ERC20/IERC20.sol
-
-pragma solidity ^0.8.0;
+//RNG-01
+pragma solidity 0.8.4;
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
@@ -180,8 +180,8 @@ interface IERC20 {
 }
 
 // File: @openzeppelin/contracts/utils/Address.sol
-
-pragma solidity ^0.8.0;
+//RNG-01
+pragma solidity 0.8.4;
 
 /**
  * @dev Collection of functions related to the address type
@@ -397,8 +397,8 @@ library Address {
 }
 
 // File: @openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
-
-pragma solidity ^0.8.0;
+//RNG-01
+pragma solidity 0.8.4;
 
 /**
  * @title SafeERC20
@@ -495,8 +495,8 @@ library SafeERC20 {
 }
 
 // File: @chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol
-
-pragma solidity ^0.8.0;
+//RNG-01
+pragma solidity 0.8.4;
 
 interface LinkTokenInterface {
     function allowance(address owner, address spender) external view returns (uint256 remaining);
@@ -533,8 +533,8 @@ interface LinkTokenInterface {
 }
 
 // File: @chainlink/contracts/src/v0.8/dev/VRFRequestIDBase.sol
-
-pragma solidity ^0.8.0;
+//RNG-01
+pragma solidity 0.8.4;
 
 contract VRFRequestIDBase {
     /**
@@ -575,8 +575,8 @@ contract VRFRequestIDBase {
 }
 
 // File: @chainlink/contracts/src/v0.8/dev/VRFConsumerBase.sol
-
-pragma solidity ^0.8.0;
+//RNG-01
+pragma solidity 0.8.4;
 
 /** ****************************************************************************
  * @notice Interface for contracts using VRF randomness
@@ -764,8 +764,8 @@ abstract contract VRFConsumerBase is VRFRequestIDBase {
 }
 
 // File: contracts/interfaces/IRandomNumberGenerator.sol
-
-pragma solidity ^0.8.4;
+//RNG-01
+pragma solidity 0.8.4;
 
 interface IRandomNumberGenerator {
     /**
@@ -785,8 +785,8 @@ interface IRandomNumberGenerator {
 }
 
 // File: contracts/interfaces/IPBiswapLottery.sol
-
-pragma solidity ^0.8.4;
+//RNG-01
+pragma solidity 0.8.4;
 
 interface IBiswapLottery {
     /**
@@ -857,8 +857,8 @@ interface IBiswapLottery {
 }
 
 // File: contracts/RandomNumberGenerator.sol
-
-pragma solidity ^0.8.4;
+//RNG-01
+pragma solidity 0.8.4;
 
 contract RandomNumberGenerator is VRFConsumerBase, IRandomNumberGenerator, Ownable {
     using SafeERC20 for IERC20;

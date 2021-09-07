@@ -47,11 +47,11 @@ async function main() {
     console.log(`Deployer address: ${ accounts[0].address}`,
         `\nStart deploying Random number generator contract first`);
 
-    const RNG = await ethers.getContractFactory(`TestRandomNumberGenerator`);
-    const rng = await RNG.deploy();
-    await rng.deployTransaction.wait();
-    const rngAddress = rng.address;
-    console.log(`Random number generator contract deployed to: ${ rngAddress }`);
+    // const RNG = await ethers.getContractFactory(`TestRandomNumberGenerator`);
+    // const rng = await RNG.deploy();
+    // await rng.deployTransaction.wait();
+    // const rngAddress = rng.address;
+    // console.log(`Random number generator contract deployed to: ${ rngAddress }`);
 
     console.log(`Start deploy lottery contract`);
     const Lottery = await ethers.getContractFactory(`BiswapLottery`);
@@ -60,8 +60,8 @@ async function main() {
     const lotteryAddress = lottery.address;
     console.log(`Lottery deployed to ${ lotteryAddress }`);
 
-    console.log(`Add lottery contract to RNG contract`);
-    await rng.setLotteryAddress(lotteryAddress);
+    // console.log(`Add lottery contract to RNG contract`);
+    // await rng.setLotteryAddress(lotteryAddress);
 
     console.log(`Setting managing addresses`);
     await lottery.setManagingAddresses(accounts[0].address, accounts[0].address, accounts[0].address, accounts[0].address, accounts[0].address);

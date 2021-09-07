@@ -7,11 +7,11 @@ const Web3 = require(`web3`);
 const { privatKey, PK_local, privatKey_acc1 } = require('../secrets.json');
 
 
-const LOTTERY_ADDRESS = '0x0833D85674E78127b022aE0B1a33A9d0cb4dc4fa';
+const LOTTERY_ADDRESS = '0x75ff08dD82e667EeE968C1704294b05953B3aA2F';
 const RNG_ADDRESS = `0xCfC6F620226d4Bf792E536D5cc189A6443e2b2BD`;
 // const LOTTERY_ADDRESS = '0xccE260AfcACB58c79d0dE54f9D19cF94ECf94C9A'; //TestNet
 // const RNG_ADDRESS = `0xD7DF6d2b1FD1E9Cf1C75BC4068AC3fb67e376D47`; //TestNet
-const LOTTERY_DURATION = 600; // 4 hours
+const LOTTERY_DURATION = 600;
 const PRICE_TICKET_IN_USDT = BigNumber.from(`1000000000000000`); //Min price 1000000000000
 const REWARDS_BREAKDOWN = [250, 375, 625, 1250, 2500, 5000];
 const DISCOUNT_DIVISOR = 10000;
@@ -164,6 +164,7 @@ function getCountTicketsOnBrackets(ticketsNumbers, winningNumber, rewardsBreakdo
     }
     return [bswPerBracket, countTicketsPerBracket, amountToInjectNextLottery];
 }
+
 
 
 main()

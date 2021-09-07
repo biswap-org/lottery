@@ -58,6 +58,33 @@ function getBracketsForTickets(ticketsIds, ticketsNumbers, winNumber){
     return winTicketsId;
 }
 
+function getWinningAmountForTickets(ticketsIds, ticketsNumbers, winNumber, bswPerBracket){
+    let transfWinNumber, transfTicketsNumber;
+    let winTicketsId = new Map();
+    let totalAmount = 0;
+    for(let i = 0; i < ticketsNumbers.length; i++){
+        transfWinNumber = 0;
+        transfTicketsNumber = 0;
+        for(let j = 0; j < 6; j++){
+            transfWinNumber = (winNumber % (10**(j+1)));
+            transfTicketsNumber = (ticketsNumbers[i] % (10**(j+1)));
+            if (transfWinNumber === transfTicketsNumber){
+                winTicketsId.set(ticketsIds[i], [j, bswPerBracket[j]]);
+                if(j === 5){
+                    totalAmount += bswPerBracket[j];
+                }
+            } else {
+                if(j > 0){
+                    totalAmount += bswPerBracket[j-1];
+                }
+                break;
+            }
+        }
+    }
+    // Map(key: ticketId, value: [bracket, winAmount])
+    return [winTicketsId, totalAmount];
+}
+
 function getCountTicketsOnBrackets(ticketsNumbers, winningNumber, rewardsBreakdown, amountCollectedInBSW){
     let bswPerBracket = [];
     let countTicketsPerBracket = [];
@@ -101,6 +128,15 @@ function getCountTicketsOnBrackets(ticketsNumbers, winningNumber, rewardsBreakdo
     let discountDivisor = 10000;
 
 describe(`Check start new lottery`, function () {
+    it(`Check getWinningAmountForTickets function`, async function (){
+        let ticketsIds, ticketsNumbers, winNumber, bswPerBracket;
+        winNumber = 1782222;
+        ticketsNumbers = [1789222, 1784292, 1678722, 1782111, 1782222];
+        ticketsIds = [0, 1, 2, 3, 4];
+        bswPerBracket = [10, 20, 30, 40, 50, 60];
+        let receive = getWinningAmountForTickets(ticketsIds, ticketsNumbers, winNumber, bswPerBracket);
+        console.log(receive);
+    });
 
     it(`Start new lottery`, async function () {
         const timeLastBlock = (await ethers.provider.getBlock(`latest`)).timestamp;

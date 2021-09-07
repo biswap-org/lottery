@@ -699,16 +699,16 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     uint256 public burningShare = 1300; //1300: 13%
     uint256 public competitionAndRefShare = 700; //700: 7%
 
-    uint256 public maxNumberTicketsPerBuyOrClaim = 100;
+    uint256 public maxNumberTicketsPerBuyOrClaim = 500; //TODO change in prod 100
 
     uint256 public maxPriceTicketInBSW = 50 ether;
-    uint256 public minPriceTicketInBSW = 0.005 ether;
+    uint256 public minPriceTicketInBSW = 0.00000005 ether; //TODO change in prod 0.005 ether
     uint256 public maxDiffPriceUpdate = 1500; //Difference between old and new price given from oracle
 
     uint256 public pendingInjectionNextLottery;
 
     uint256 public constant MIN_DISCOUNT_DIVISOR = 500;
-    uint256 public constant MIN_LENGTH_LOTTERY = 4 hours - 5 minutes; // 4 hours
+    uint256 public constant MIN_LENGTH_LOTTERY = /*4 hours - */ 1 minutes; // 4 hours //TODO change in prod 4 hours - 1 minutes
     uint256 public constant MAX_LENGTH_LOTTERY = 4 days + 5 minutes; // 4 days
 
 
@@ -791,7 +791,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     );
     event NewRandomGenerator(address indexed randomGenerator);
     event NewPriceOracle(address oracle);
-    event TicketsPurchase(address indexed buyer, uint256 indexed lotteryId, uint256 numberTickets);
+    event TicketsPurchase(address indexed buyer, uint256 indexed lotteryId, uint256 numberTickets, uint256 amount);
     event TicketsClaim(address indexed claimer, uint256 amount, uint256 indexed lotteryId, uint256 numberTickets);
 
     /**
@@ -866,7 +866,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         // Increase lottery ticket number
         currentTicketId += _ticketNumbers.length;
 
-        emit TicketsPurchase(msg.sender, _lotteryId, _ticketNumbers.length);
+        emit TicketsPurchase(msg.sender, _lotteryId, _ticketNumbers.length, amountBSWToTransfer);
     }
 
     /**

@@ -3,7 +3,7 @@
 const { ethers, network } = require(`hardhat`);
 
 let vrfCoordinatorAddress, linkTokenAddress, keyHash, bswTokenAddress, usdtTokenAddress, priceOracleAddress;
-
+const injectorAddress = `0xa96ba42cCc8EBE8096D50347FAfaF94d2e6F372B`;
 async function main() {
     let accounts = await ethers.getSigners();
     switch(network.name){
@@ -46,16 +46,20 @@ async function main() {
     console.log(`Deployer address: ${ accounts[0].address}`,
         `\nStart deploying Random number generator contract first`);
 
-    const RNG = await ethers.getContractFactory(`RandomNumberGenerator`);
-    const rng = await RNG.deploy(vrfCoordinatorAddress, linkTokenAddress);
-    await rng.deployTransaction.wait();
-    const rngAddress = rng.address;
-    console.log(`Random number generator contract deployed to: ${ rngAddress }`);
-    console.log(`Set KeyHash ${ keyHash } to RNG contract`);
-    let tx = await rng.setKeyHash(keyHash);
-    await tx.wait();
-    console.log(`keyHash ${ await rng.keyHash() } was successfully added`);
-
+    // const RNG = await ethers.getContractFactory(`RandomNumberGenerator`);
+    // const rng = await RNG.deploy(vrfCoordinatorAddress, linkTokenAddress);
+    // await rng.deployTransaction.wait();
+    // const rngAddress = rng.address;
+    // console.log(`Random number generator contract deployed to: ${ rngAddress }`);
+    // console.log(`Set KeyHash ${ keyHash } to RNG contract`);
+    // let tx = await rng.setKeyHash(keyHash);
+    // await tx.wait();
+    // console.log(`keyHash ${ await rng.keyHash() } was successfully added`);
+    // console.log(`Set Chain link Fee to RNG contract`);
+    // tx = await rng.setFee(`200000000000000000`);
+    // await tx.wait();
+    // console.log(`Fee set to rng contract at: ${await rng.fee()}`);
+    const rngAddress = `0xb577e39BA917c556a630A8d02DE7207599f1211f`;
     console.log(`Start deploy lottery contract`);
     const Lottery = await ethers.getContractFactory(`BiswapLottery`);
     const lottery = await Lottery.deploy(bswTokenAddress, usdtTokenAddress, rngAddress, priceOracleAddress);
@@ -63,21 +67,21 @@ async function main() {
     const lotteryAddress = lottery.address;
     console.log(`Lottery deployed to ${ lotteryAddress }`);
 
-    console.log(`Add lottery contract to RNG contract`);
-    await rng.setLotteryAddress(lotteryAddress);
+    // console.log(`Add lottery contract to RNG contract`);
+    // await rng.setLotteryAddress(lotteryAddress);
 
     console.log(`Setting managing addresses`);
-    await lottery.setManagingAddresses(accounts[0].address, accounts[0].address, accounts[0].address, accounts[0].address, accounts[0].address);
+    await lottery.setManagingAddresses(accounts[0].address, accounts[0].address, injectorAddress, accounts[0].address, accounts[0].address);
 
 
-    if (network.name === `localhost`){
+    if (network.name === `mainnetBSC`){
         console.log(`Transfer 1 LINK to rng contract`);
         const abi = [
             "function balanceOf(address owner) view returns (uint256)",
             "function transfer(address to, uint amount) returns (bool)"
         ]
-        let tokenLinkContract = new ethers.Contract(linkTokenAddress, abi, accounts[0]);
-        await tokenLinkContract.transfer(rngAddress, `1000000000000000000`);
+        // let tokenLinkContract = new ethers.Contract(linkTokenAddress, abi, accounts[0]);
+        // await tokenLinkContract.transfer(rngAddress, `3000000000000000000`);
         }
 }
 

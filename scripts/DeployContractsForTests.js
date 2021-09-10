@@ -47,15 +47,15 @@ async function main() {
     console.log(`Deployer address: ${ accounts[0].address}`,
         `\nStart deploying Random number generator contract first`);
 
-    // const RNG = await ethers.getContractFactory(`TestRandomNumberGenerator`);
-    // const rng = await RNG.deploy();
-    // await rng.deployTransaction.wait();
-    // const rngAddress = rng.address;
-    // console.log(`Random number generator contract deployed to: ${ rngAddress }`);
+    const RNG = await ethers.getContractFactory(`TestRandomNumberGenerator`);
+    const rng = await RNG.deploy();
+    await rng.deployTransaction.wait();
+    const rngAddress = rng.address;
+    console.log(`Random number generator contract deployed to: ${ rngAddress }`);
 
     console.log(`Start deploy lottery contract`);
     const Lottery = await ethers.getContractFactory(`BiswapLottery`);
-    const lottery = await Lottery.deploy(bswTokenAddress, usdtTokenAddress, rngAddress, priceOracleAddress);
+    const lottery = await Lottery.deploy(bswTokenAddress, usdtTokenAddress, rngAddress, priceOracleAddress,{gasLimit: 4000000});
     await lottery.deployTransaction.wait();
     const lotteryAddress = lottery.address;
     console.log(`Lottery deployed to ${ lotteryAddress }`);

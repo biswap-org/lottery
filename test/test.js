@@ -140,7 +140,8 @@ describe(`Check start new lottery`, function () {
 
     it(`Start new lottery`, async function () {
         const timeLastBlock = (await ethers.provider.getBlock(`latest`)).timestamp;
-        endTime = timeLastBlock + 14400; //after 4 hours
+        endTime = timeLastBlock + 600; //after 4 hours
+        console.log(endTime.toString());
         await expect(lottery.startLottery(endTime, priceTicketInUSDT, discountDivisor, rewardsBreakdown)).to.be
             .emit(lottery, 'LotteryOpen');
         console.log(`Lottery start. Current lottery id: `, (await lottery.currentLotteryId()).toString());
@@ -214,8 +215,9 @@ describe(`Chek start new lottery and inject from previous lottery`, function(){
     })
 
     it('Check buy 200 tickets from 1 transaction', async function (){
-        ticketsNumbers = Array.from(Array(200),
+        ticketsNumbers = Array.from(Array(100),
             () => (Math.floor(Math.random() * (1999999 - 1000000 + 1)) + 1000000));
+        console.log(ticketsNumbers);
         await lottery.setMaxNumberTicketsPerBuy(200);
         let balanceLotteryBefore = await bswToken.balanceOf(lottery.address);
         let currentPriceInBSW = await lottery.getCurrentTicketPriceInBSW(lottery.currentLotteryId());

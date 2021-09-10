@@ -736,6 +736,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         uint256 firstTicketId;
         uint256 firstTicketIdNextLottery;
         uint256 amountCollectedInBSW;
+        uint256 amountInjectedInBSW;
         uint32 finalNumber;
     }
 
@@ -1126,6 +1127,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
             firstTicketId: currentTicketId,
             firstTicketIdNextLottery: currentTicketId,
             amountCollectedInBSW: 0,
+            amountInjectedInBSW: pendingInjectionNextLottery,
             finalNumber: 0
         });
 

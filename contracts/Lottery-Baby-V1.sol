@@ -1,39 +1,22 @@
 // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.10;
+pragma abicoder v2;
 
-pragma solidity ^0.8.16;
-
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-
-
-// File: contracts/interfaces/IRandomNumberGenerator.sol
-
-pragma solidity ^0.8.4;
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/interfaces/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 interface IRandomNumberGenerator {
-    /**
-     * Requests randomness from a user-provided seed
-     */
+
     function getRandomNumber(uint256 _seed) external;
 
-    /**
-     * View latest lotteryId numbers
-     */
     function viewLatestLotteryId() external view returns (uint256);
 
-    /**
-     * Views random result
-     */
     function viewRandomResult() external view returns (uint32);
 }
-
-//Price Oracle interface
-
-pragma solidity ^0.8.0;
 
 interface IPriceOracle {
     struct Observation {
@@ -46,47 +29,18 @@ interface IPriceOracle {
     function consult(address tokenIn, uint amountIn, address tokenOut) external view returns (uint);
 }
 
-// File: contracts/interfaces/IBiswapLottery.sol
+interface IBabyLottery {
 
-pragma solidity ^0.8.4;
-
-interface IBiswapLottery {
-    /**
-     * @notice Buy tickets for the current lottery
-     * @param _lotteryId: lotteryId
-     * @param _ticketNumbers: array of ticket numbers between 1,000,000 and 1,999,999
-     * @dev Callable by users
-     */
     function buyTickets(uint256 _lotteryId, uint32[] calldata _ticketNumbers) external;
 
-    /**
-     * @notice Claim a set of winning tickets for a lottery
-     * @param _lotteryId: lottery id
-     * @param _ticketIds: array of ticket ids
-     * @param _brackets: array of brackets for the ticket ids
-     * @dev Callable by users only, not contract!
-     */
     function claimTickets(
         uint256 _lotteryId,
         uint256[] calldata _ticketIds,
         uint32[] calldata _brackets
     ) external;
 
-    /**
-     * @notice Close lottery
-     * @param _lotteryId: lottery id
-     * @dev Callable by operator
-     */
     function closeLottery(uint256 _lotteryId) external;
 
-    /**
-     * @notice Draw the final number, calculate reward in BSW per group, and make lottery claimable
-     * @param _lotteryId: lottery id
-     * @param _autoInjection: reinjects funds into next lottery (vs. withdrawing all)
-     * @param _bswPerBracket: distribution of winnings by bracket
-     * @param _countTicketsPerBracket: total number of tickets in each bracket
-     * @dev Callable by operator
-     */
     function drawFinalNumberAndMakeLotteryClaimable(
         uint256 _lotteryId,
         uint[6] calldata _bswPerBracket,
@@ -97,7 +51,7 @@ interface IBiswapLottery {
     /**
      * @notice Inject funds
      * @param _lotteryId: lottery id
-     * @param _amount: amount to inject in BSW token
+     * @param _amount: amount to inject in BABY token
      * @dev Callable by operator
      */
     function injectFunds(uint256 _lotteryId, uint256 _amount) external;
@@ -106,7 +60,7 @@ interface IBiswapLottery {
      * @notice Start the lottery
      * @dev Callable by operator
      * @param _endTime: endTime of the lottery
-     * @param _priceTicketInUSDT: price of a ticket in BSW
+     * @param _priceTicketInUSDT: price of a ticket in BABY
      * @param _discountDivisor: the divisor to calculate the discount magnitude for bulks
      * @param _rewardsBreakdown: breakdown of rewards per bracket (must sum to 10,000)
      */
@@ -122,19 +76,15 @@ interface IBiswapLottery {
      */
     function viewCurrentLotteryId() external returns (uint256);
 
-    function getCurrentTicketPriceInBSW(uint _lotteryId) external view returns(uint);
+    function getCurrentTicketPriceInBABY(uint _lotteryId) external view returns(uint);
 }
 
-// File: contracts/BiswapLottery.sol
 
-pragma solidity ^0.8.4;
-pragma abicoder v2;
-
-/** @title Biswap Lottery.
+/** @title Baby Lottery.
  * @notice It is a contract for a lottery system using
  * randomness provided externally.
  */
-contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
+contract BabyLottery is ReentrancyGuard, IBabyLottery, Ownable {
     using SafeERC20 for IERC20;
 
     address public injectorAddress;
@@ -143,7 +93,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     address public burningAddress;  //Send tokens from every deposit to burn
     address public competitionAndRefAddress; //Send tokens from every deposit to referrals and competitions
     address public usdtTokenAddress;
-    address public bswTokenAddress;
+    address public babyTokenAddress;
 
     uint256 public currentLotteryId;
     uint256 public currentTicketId;
@@ -153,8 +103,8 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
 
     uint256 public maxNumberTicketsPerBuyOrClaim = 100;
 
-    uint256 public maxPriceTicketInBSW = 50 ether;
-    uint256 public minPriceTicketInBSW = 0.005 ether;
+    uint256 public maxPriceTicketInBABY = 50 ether;
+    uint256 public minPriceTicketInBABY = 0.005 ether;
     uint256 public maxDiffPriceUpdate = 1500; //Difference between old and new price given from oracle
 
     uint256 public pendingInjectionNextLottery;
@@ -164,7 +114,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     uint256 public constant MAX_LENGTH_LOTTERY = 4 days + 5 minutes; // 4 days
 
 
-    IERC20 public bswToken;
+    IERC20 public babyToken;
     IRandomNumberGenerator public randomGenerator;
     IPriceOracle public priceOracle;
 
@@ -179,15 +129,15 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         Status status;
         uint256 startTime;
         uint256 endTime;
-        uint256 priceTicketInBSW;
+        uint256 priceTicketInBABY;
         uint256 priceTicketInUSDT;
         uint256 discountDivisor;    //Must be 10000 for discount 4,99% for 500 tickets
         uint256[6] rewardsBreakdown; // 0: 1 matching number // 5: 6 matching numbers
-        uint256[6] bswPerBracket;
+        uint256[6] babyPerBracket;
         uint256[6] countWinnersPerBracket;
         uint256 firstTicketId;
         uint256 firstTicketIdNextLottery;
-        uint256 amountCollectedInBSW;
+        uint256 amountCollectedInBABY;
         uint32 finalNumber;
     }
 
@@ -246,22 +196,22 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     event TicketsPurchase(address indexed buyer, uint256 indexed lotteryId, uint256 numberTickets);
     event TicketsClaim(address indexed claimer, uint256 amount, uint256 indexed lotteryId, uint256 numberTickets);
 
-    /**
-     * @notice Constructor
-     * @dev RandomNumberGenerator must be deployed prior to this contract
-     * @param _bswTokenAddress: address of the BSW token
-     * @param _usdtTokenAddress: address of the USDT token
-     * @param _randomGeneratorAddress: address of the RandomGenerator contract used to work with ChainLink VRF
-     * @param _priceOracleAddress: address of oracle
-     */
+    // /**
+    //  * @notice Constructor
+    //  * @dev RandomNumberGenerator must be deployed prior to this contract
+    //  * @param _bswTokenAddress: address of the BABY token
+    //  * @param _usdtTokenAddress: address of the USDT token
+    //  * @param _randomGeneratorAddress: address of the RandomGenerator contract used to work with ChainLink VRF
+    //  * @param _priceOracleAddress: address of oracle
+    //  */
     constructor(
-        address _bswTokenAddress,
+        address _babyTokenAddress,
         address _usdtTokenAddress,
         address _randomGeneratorAddress,
         address _priceOracleAddress
     ) {
-        bswToken = IERC20(_bswTokenAddress);
-        bswTokenAddress = _bswTokenAddress;
+        babyToken = IERC20(_babyTokenAddress);
+        babyTokenAddress = _babyTokenAddress;
         usdtTokenAddress = _usdtTokenAddress;
         randomGenerator = IRandomNumberGenerator(_randomGeneratorAddress);
         priceOracle = IPriceOracle(_priceOracleAddress);
@@ -293,21 +243,21 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         require(_lotteries[_lotteryId].status == Status.Open, "Lottery is not open");
         require(block.timestamp < _lotteries[_lotteryId].endTime, "Lottery is over");
 
-        // Update BSW price for _lotteryId
-        _updateBSWPrice(_lotteryId);
+        // Update BABY price for _lotteryId
+        _updateBABYPrice(_lotteryId);
 
-        // Calculate number of BSW to this contract
-        uint256 amountBSWToTransfer = _calculateTotalPriceForBulkTickets(
+        // Calculate number of BABY to this contract
+        uint256 amountBABYToTransfer = _calculateTotalPriceForBulkTickets(
             _lotteries[_lotteryId].discountDivisor,
-            _lotteries[_lotteryId].priceTicketInBSW,
+            _lotteries[_lotteryId].priceTicketInBABY,
             _ticketNumbers.length
         );
 
-        // Transfer BSW tokens to this contract
-        bswToken.safeTransferFrom(address(msg.sender), address(this), amountBSWToTransfer);
+        // Transfer BABY tokens to this contract
+        babyToken.safeTransferFrom(address(msg.sender), address(this), amountBABYToTransfer);
 
         // Increment the total amount collected for the lottery round
-        _lotteries[_lotteryId].amountCollectedInBSW += amountBSWToTransfer;
+        _lotteries[_lotteryId].amountCollectedInBABY += amountBABYToTransfer;
 
         uint _currentTicketId = currentTicketId;
         for (uint256 i = 0; i < _ticketNumbers.length; i++) {
@@ -347,7 +297,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         require(_lotteries[_lotteryId].status == Status.Claimable, "Lottery not claimable");
 
         // Initializes the rewardInBSWToTransfer
-        uint256 rewardInBSWToTransfer;
+        uint256 rewardInBABYToTransfer;
 
         for (uint256 i = 0; i < _ticketIds.length; i++) {
             require(_brackets[i] < 6, "Bracket out of range"); // Must be between 0 and 5
@@ -374,20 +324,20 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
             }
 
             // Increment the reward to transfer
-            rewardInBSWToTransfer += rewardForTicketId;
+            rewardInBABYToTransfer += rewardForTicketId;
         }
 
         // Transfer money to msg.sender
-        bswToken.safeTransfer(msg.sender, rewardInBSWToTransfer);
+        babyToken.safeTransfer(msg.sender, rewardInBABYToTransfer);
 
-        emit TicketsClaim(msg.sender, rewardInBSWToTransfer, _lotteryId, _ticketIds.length);
+        emit TicketsClaim(msg.sender, rewardInBABYToTransfer, _lotteryId, _ticketIds.length);
     }
 
-    function getCurrentTicketPriceInBSW(uint _lotteryId) override external view returns(uint){
+    function getCurrentTicketPriceInBABY(uint _lotteryId) override external view returns(uint){
         return priceOracle.consult(
             usdtTokenAddress,
             _lotteries[_lotteryId].priceTicketInUSDT,
-            bswTokenAddress
+            babyTokenAddress
         );
     }
 
@@ -409,17 +359,17 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         emit LotteryClose(_lotteryId, currentTicketId);
     }
 
-    /**
-     * @notice Draw the final number, calculate reward in BSW per group, and make lottery claimable
-     * @param _lotteryId: lottery id
-     * @param _autoInjection: reinjects funds into next lottery (vs. withdrawing all)
-     * @param _bswPerBracket: distribution of winnings by bracket
-     * @param _countTicketsPerBracket: total number of tickets in each bracket
-     * @dev Callable by operator
-     */
+    // /**
+    //  * @notice Draw the final number, calculate reward in BABY per group, and make lottery claimable
+    //  * @param _lotteryId: lottery id
+    //  * @param _autoInjection: reinjects funds into next lottery (vs. withdrawing all)
+    //  * @param _bswPerBracket: distribution of winnings by bracket
+    //  * @param _countTicketsPerBracket: total number of tickets in each bracket
+    //  * @dev Callable by operator
+    //  */
     function drawFinalNumberAndMakeLotteryClaimable(
         uint256 _lotteryId,
-        uint[6] calldata _bswPerBracket,
+        uint[6] calldata _babyPerBracket,
         uint[6] calldata _countTicketsPerBracket,
         bool _autoInjection
     )
@@ -430,7 +380,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     {
         require(_lotteries[_lotteryId].status == Status.Close, "Lottery not close");
         require(_lotteryId == randomGenerator.viewLatestLotteryId(), "Numbers not drawn");
-        require(_bswPerBracket.length == 6, 'Wrong bswPerBracket array size!');
+        require(_babyPerBracket.length == 6, 'Wrong babyPerBracket array size!');
         require(_countTicketsPerBracket.length == 6, 'Wrong countTicketsPerBracket array size!');
 
         //Withdraw burn, referrals and competitions pool
@@ -441,9 +391,9 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
         // Calculate the finalNumber based on the randomResult generated by ChainLink's fallback
         uint32 finalNumber = randomGenerator.viewRandomResult();
         uint ticketsCountPerBrackets = 0;
-        uint bswSumPerBrackets = 0;
+        uint babySumPerBrackets = 0;
         for (uint i = 0; i < 6; i++){
-            uint winningPoolPerBracket = _bswPerBracket[i] * _countTicketsPerBracket[i];
+            uint winningPoolPerBracket = _babyPerBracket[i] * _countTicketsPerBracket[i];
             ticketsCountPerBrackets += _countTicketsPerBracket[i];
             if(_countTicketsPerBracket[i] > 0){
                 require(
@@ -451,23 +401,23 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
                     'Wrong amount on bracket'
                 );
             }
-            bswSumPerBrackets += winningPoolPerBracket;
+            babySumPerBrackets += winningPoolPerBracket;
         }
 
-        require(bswSumPerBrackets <= amountToDistribute, 'Wrong brackets Total amount');
+        require(babySumPerBrackets <= amountToDistribute, 'Wrong brackets Total amount');
 
-        _lotteries[_lotteryId].bswPerBracket = _bswPerBracket;
+        _lotteries[_lotteryId].babyPerBracket = _babyPerBracket;
         _lotteries[_lotteryId].countWinnersPerBracket = _countTicketsPerBracket;
 
         // Update internal statuses for lottery
         _lotteries[_lotteryId].finalNumber = finalNumber;
         _lotteries[_lotteryId].status = Status.Claimable;
 
-        // Transfer not winning BSW to treasury address if _autoInjection is false
+        // Transfer not winning BABY to treasury address if _autoInjection is false
         if (_autoInjection) {
-            pendingInjectionNextLottery = amountToDistribute - bswSumPerBrackets;
+            pendingInjectionNextLottery = amountToDistribute - babySumPerBrackets;
         } else {
-            bswToken.safeTransfer(treasuryAddress, amountToDistribute - bswSumPerBrackets);
+            babyToken.safeTransfer(treasuryAddress, amountToDistribute - babySumPerBrackets);
         }
 
         emit LotteryNumberDrawn(currentLotteryId, finalNumber, ticketsCountPerBrackets);
@@ -511,14 +461,14 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     /**
      * @notice Inject funds
      * @param _lotteryId: lottery id
-     * @param _amount: amount to inject in BSW token
+     * @param _amount: amount to inject in BABY token
      * @dev Callable by owner or injector address
      */
     function injectFunds(uint256 _lotteryId, uint256 _amount) external override onlyOwnerOrInjector {
         require(_lotteries[_lotteryId].status == Status.Open, "Lottery not open");
 
-        bswToken.safeTransferFrom(address(msg.sender), address(this), _amount);
-        _lotteries[_lotteryId].amountCollectedInBSW += _amount;
+        babyToken.safeTransferFrom(address(msg.sender), address(this), _amount);
+        _lotteries[_lotteryId].amountCollectedInBABY += _amount;
 
         emit LotteryInjection(_lotteryId, _amount);
     }
@@ -547,12 +497,12 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
             "Lottery length outside of range"
         );
 
-        //Calculation price in BSW
-        uint256 _priceTicketInBSW = _getPriceInBSW(_priceTicketInUSDT);
+        //Calculation price in BABY
+        uint256 _priceTicketInBABY = _getPriceInBABY(_priceTicketInUSDT);
 
         require(
-            (_priceTicketInBSW >= minPriceTicketInBSW) && (_priceTicketInBSW <= maxPriceTicketInBSW),
-            "Price ticket in BSW Outside of limits"
+            (_priceTicketInBABY >= minPriceTicketInBABY) && (_priceTicketInBABY <= maxPriceTicketInBABY),
+            "Price ticket in BABY Outside of limits"
         );
 
         require(_discountDivisor >= MIN_DISCOUNT_DIVISOR, "Discount divisor too low");
@@ -572,15 +522,15 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
             status: Status.Open,
             startTime: block.timestamp,
             endTime: _endTime,
-            priceTicketInBSW: _priceTicketInBSW,
+            priceTicketInBABY: _priceTicketInBABY,
             priceTicketInUSDT: _priceTicketInUSDT,
             discountDivisor: _discountDivisor,
             rewardsBreakdown: _rewardsBreakdown,
-            bswPerBracket: [uint256(0), uint256(0), uint256(0), uint256(0), uint256(0), uint256(0)],
+            babyPerBracket: [uint256(0), uint256(0), uint256(0), uint256(0), uint256(0), uint256(0)],
             countWinnersPerBracket: [uint256(0), uint256(0), uint256(0), uint256(0), uint256(0), uint256(0)],
             firstTicketId: currentTicketId,
             firstTicketIdNextLottery: currentTicketId,
-            amountCollectedInBSW: 0,
+            amountCollectedInBABY: 0,
             finalNumber: 0
         });
 
@@ -601,7 +551,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
      * @dev Only callable by owner.
      */
     function recoverWrongTokens(address _tokenAddress, uint256 _tokenAmount) external onlyOwner {
-        require(_tokenAddress != address(bswTokenAddress), "Cannot be BSW token");
+        require(_tokenAddress != address(babyTokenAddress), "Cannot be BABY token");
 
         IERC20(_tokenAddress).safeTransfer(address(msg.sender), _tokenAmount);
 
@@ -609,10 +559,10 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     }
 
     /**
-     * @notice Set BSW price ticket upper/lower limit
+     * @notice Set BABY price ticket upper/lower limit
      * @dev Only callable by owner
-     * @param _minPriceTicketInBSW: minimum price of a ticket in BSW
-     * @param _maxPriceTicketInBSW: maximum price of a ticket in BSW
+     * @param _minPriceTicketInBSW: minimum price of a ticket in BABY
+     * @param _maxPriceTicketInBSW: maximum price of a ticket in BABY
      */
     function setMinAndMaxTicketPriceInBSW(uint256 _minPriceTicketInBSW, uint256 _maxPriceTicketInBSW)
         external
@@ -620,8 +570,8 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     {
         require(_minPriceTicketInBSW <= _maxPriceTicketInBSW, "minPrice must be < maxPrice");
 
-        minPriceTicketInBSW = _minPriceTicketInBSW;
-        maxPriceTicketInBSW = _maxPriceTicketInBSW;
+        minPriceTicketInBABY = _minPriceTicketInBSW;
+        maxPriceTicketInBABY = _maxPriceTicketInBSW;
     }
 
     /**
@@ -693,7 +643,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     /**
      * @notice Calculate price of a set of tickets
      * @param _discountDivisor: divisor for the discount
-     * @param _priceTicket price of a ticket (in BSW)
+     * @param _priceTicket price of a ticket (in BABY)
      * @param _numberTickets number of tickets to buy
      */
     function calculateTotalPriceForBulkTickets(
@@ -826,23 +776,23 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     function _withdrawBurnAndCompetition(uint _lotteryId) internal returns(uint){
         require(_lotteries[_lotteryId].status == Status.Close, "Lottery not close");
 
-        uint collectedAmount = _lotteries[_lotteryId].amountCollectedInBSW;
+        uint collectedAmount = _lotteries[_lotteryId].amountCollectedInBABY;
         uint burnSum = (collectedAmount * burningShare) / 10000 ;
         uint competitionAndRefSum = (collectedAmount * competitionAndRefShare) / 10000 ;
-        bswToken.safeTransfer(burningAddress, burnSum);
-        bswToken.safeTransfer(competitionAndRefAddress, competitionAndRefSum);
+        babyToken.safeTransfer(burningAddress, burnSum);
+        babyToken.safeTransfer(competitionAndRefAddress, competitionAndRefSum);
         return (collectedAmount - burnSum - competitionAndRefSum);
     }
 
     /**
-     * @notice Update BSW price for lotteryID
+     * @notice Update BABY price for lotteryID
      */
-    function _updateBSWPrice(uint256 _lotteryId) private {
-        uint oldPriceInBSW = _lotteries[_lotteryId].priceTicketInBSW;
-        uint newPriceInBSW = priceOracle.consult(usdtTokenAddress, _lotteries[_lotteryId].priceTicketInUSDT, bswTokenAddress);
+    function _updateBABYPrice(uint256 _lotteryId) private {
+        uint oldPriceInBABY = _lotteries[_lotteryId].priceTicketInBABY;
+        uint newPriceInBABY = priceOracle.consult(usdtTokenAddress, _lotteries[_lotteryId].priceTicketInUSDT, babyTokenAddress);
 
-        require(_chekPriceDifference(newPriceInBSW, oldPriceInBSW, maxDiffPriceUpdate), 'Oracle give invalid price');
-        _lotteries[_lotteryId].priceTicketInBSW = newPriceInBSW;
+        require(_chekPriceDifference(newPriceInBABY, oldPriceInBABY, maxDiffPriceUpdate), 'Oracle give invalid price');
+        _lotteries[_lotteryId].priceTicketInBABY = newPriceInBABY;
     }
 
     /**
@@ -858,10 +808,10 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
     }
 
     /**
-     * @notice Get current exchange rate BSW/USDT from oracle
+     * @notice Get current exchange rate BABY/USDT from oracle
      */
-    function _getPriceInBSW(uint256 _priceInUSDT) internal view returns(uint256) {
-        return priceOracle.consult(usdtTokenAddress, _priceInUSDT, bswTokenAddress);
+    function _getPriceInBABY(uint256 _priceInUSDT) internal view returns(uint256) {
+        return priceOracle.consult(usdtTokenAddress, _priceInUSDT, babyTokenAddress);
     }
 
     /**
@@ -889,7 +839,7 @@ contract BiswapLottery is ReentrancyGuard, IBiswapLottery, Ownable {
 
         // Confirm that the two transformed numbers are the same, if not throw
         if (transformedWinningNumber == transformedUserNumber) {
-            return _lotteries[_lotteryId].bswPerBracket[_bracket];
+            return _lotteries[_lotteryId].babyPerBracket[_bracket];
         } else {
             return 0;
         }

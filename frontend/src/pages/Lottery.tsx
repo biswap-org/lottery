@@ -148,15 +148,6 @@ const Lottery = () => {
                               }
                               fontSize="18px"
                             >
-                              {/* <Image
-                            src={Babylonia_Logo.src}
-                            style={{}}
-                            alt="BABY logo"
-                            className={
-                              grayscaleMode === "gray" ? "grayscale" : ""
-                            }
-                            width="140px"
-                          /> */}
                             </Box>
                             <Spacer />
                           </Flex>

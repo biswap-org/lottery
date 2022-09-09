@@ -33,7 +33,6 @@ const Home: NextPage<TProps> = ({ logs }) => {
     })
   }, [logs, dispatch])
 return <Lottery/>
-  // return <MainPage />;
 };
 
 export async function getServerSideProps({ req }: NextPageContext) {
@@ -58,12 +57,7 @@ export async function getServerSideProps({ req }: NextPageContext) {
     )
     .catch((err) => { });
 
-  // const markdown = await remark()
-  //   .use(remarkParse)
-  //   .use(html)
-  //   .process(logs || '')
-  // const content = markdown.toString()
-  // console.log("content =============", content);      
+      
   return {
     props: {
       logs: content,

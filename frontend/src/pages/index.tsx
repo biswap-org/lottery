@@ -14,7 +14,7 @@ import remarkRehype from "remark-rehype";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
-import Lottery from "./Lottery";
+import Lottery from "./lottery";
 
 type TProps = {
   logs: string;

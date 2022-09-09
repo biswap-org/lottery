@@ -19,7 +19,7 @@ const TokenListBNBWallet = (props: any) => {
   const tokenList = useAppSelector((state: any) => state.wallet.tokenList);
 
   // when tokenList is empty, show skeleton instead of tokenList 
-  if (tokenList === [] || tokenList.length === 0) {
+  if (true && tokenList.length === 0) {
     return (
       <TokenListReading ></TokenListReading>
     );

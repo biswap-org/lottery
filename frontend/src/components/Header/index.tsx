@@ -16,6 +16,8 @@ import { HelpButton } from "@components/HelpButton";
 import { SettingsButton } from "@components/SettingsButton";
 import { ProfileButton } from "@components/ProfileButton";
 import NetworkSelectedMenu from "@components/NetworkSelectedMenu";
+import { Dashboard } from "@components/Dashboard";
+import { Crowdsale } from "@components/MobileCrowdsaleMenu";
 // import ToggleGrayscaleMode from "@helpers/ToggleGrayscaleMode";
 
 export default function Header(props: any) {
@@ -63,9 +65,9 @@ export default function Header(props: any) {
                 <Dashboard display={{ base: "block", md: "none", xl: "none" }} />
               </Box> */}
 
-              {/* <Box display={["block", "block", "none", "none"]} mr="15px" w="40px" h="40px">
+              <Box display={["block", "block", "none", "none"]} mr="15px" w="40px" h="40px">
                   <Crowdsale />
-              </Box> */}
+              </Box>
               {/* <NetworkSelectedMenu /> */}
               <Stack
                 // spacing={8}

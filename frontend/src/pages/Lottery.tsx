@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Divider } from '@chakra-ui/react'
+import { Collapse, Divider, Grid, GridItem, Heading } from '@chakra-ui/react'
 import Header from "../components/Header/index";
 import Footer from "../components/Header/index";
 import Web3 from "web3";
@@ -54,7 +54,9 @@ import { useAppSelector, useAppDispatch } from "@hooks";
 declare const window: any;
 
 const Lottery = () => {
+  const [show, setShow] = React.useState(false)
 
+  const handleToggle = () => setShow(!show)
   // const dispatch = useAppDispatch();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -98,12 +100,12 @@ const Lottery = () => {
 
   return (
     <>
-      <Container maxW="100vw" bg="black.900" pt="7vh" pb="3" pl="0" pr="0">
+      <Container maxW="100vw" bg="black.900" pl="0" pr="0">
         <Box>
           <Header />
-          <Box h="90vh" className={
+          <Box className={
             grayscaleMode === "gray" ? "grayscale" : ""
-          } mt={8} backgroundColor={bgColor}>
+          } backgroundColor={bgColor}>
             <Flex
               maxW="100vw"
               align="center"
@@ -111,7 +113,7 @@ const Lottery = () => {
               m="0px"
               justifyContent="center"
               alignItems="center"
-              height="100vh"
+
             // pb={["5vh", "12vh", "12vh", "10vh"]}
             >
               <Box flex="100vw" bg={bgColor}>
@@ -121,7 +123,7 @@ const Lottery = () => {
                     pb={["5vh", "12vh", "12vh", "15vh"]}
                     w={["80vw", "97vw", "50vw", "40vw"]}
                     justifyContent="center"
-                    mt={lotteryCard ? '250px' : '-10px'}
+                    // mt={lotteryCard ? '250px' : '-10px'}
                     background="black.900"
                     className="ipad-portrait"
                   >
@@ -401,8 +403,195 @@ const Lottery = () => {
           <Menu />
           <Footer />
         </Box>
-      </Container>
 
+      </Container>
+      <Container maxW="100vw" fontFamily="Ropa Sans" bg="black.900" pb="3" pl="0" pr="0">
+
+        <Box>
+
+          <Header />
+          <Box fontFamily="Ropa Sans" className={
+            grayscaleMode === "gray " ? "grayscale" : ""
+          } backgroundColor={bgColor}>
+            <Center display={`flex`} pt={20} flexDir={`column`}>
+              <Heading fontFamily="Ropa Sans" as='h1' size='xl' noOfLines={1}>
+                Get your tickets now!
+              </Heading>
+              <Text mt={3} as='h1' fontWeight={`bold`} fontSize={`2xl`} size='3xl' noOfLines={1}>
+                5h 7m until the draw
+              </Text>
+            </Center>
+            <Flex
+              maxW="100vw"
+              align="center"
+              bg={bgColor}
+              m="0px"
+              justifyContent="center"
+              alignItems="center"
+
+            // pb={["5vh", "12vh", "12vh", "10vh"]}
+            >
+              <Box flex="100vw" bg={bgColor}>
+                <VStack>
+                  <Flex
+                    pt={["5vh", "10vh", "10vh", "10vh"]}
+                    pb={["5vh", "12vh", "12vh", "15vh"]}
+                    w={["80vw", "97vw", "50vw", "50vw"]}
+                    justifyContent="center"
+                    mt={lotteryCard ? '250px' : '-10px'}
+                    background="black.900"
+                    className="ipad-portrait"
+                  >
+                    <Box
+                      w={["100%"]}
+                      borderRadius="10px"
+                      boxShadow="lg"
+                      p="7px"
+                      border={"1px"}
+                      backgroundColor={colorMode === "dark" ? "black" : "white"}
+                    >
+
+                      <Box
+                        p={"15px"}
+                        border="1px"
+                        borderRadius={"10px"}
+                        bg={colorMode === "dark" ? "#5C5C5C" : bgBoxColor}
+                      >
+                        <>
+                          <Flex>
+                            <Box
+                              color={
+                                colorMode === "dark" ? "gray.100" : textTitleColor
+                              }
+                              fontSize="18px"
+                            >
+                            </Box>
+                            <Spacer />
+                          </Flex>
+
+                          <Flex justifyContent={`space-between`}>
+                            <Text fontSize="3xl" mb='4' >Next Draw</Text>
+                            <Text fontSize="2xl" mb='4' >#655 | Draw: Sep 13, 2022, 5:00 AM</Text>
+                          </Flex>
+                          <Flex height="1"></Flex>
+
+                          <Box
+                            color={colorMode === "dark" ? "gray.100" : textColor}
+                            id="BNB Field"
+                            p="3"
+                            // height="100px"
+                            backgroundColor="white"
+                            bg={colorMode === "dark" ? "black" : "white"}
+                            borderRadius="5"
+                            border="1px"
+                          >
+                            <Grid
+                              mt={4}
+                              
+                              // h='200px'
+                              templateRows='repeat(2, 1fr)'
+                              templateColumns='repeat(5, 1fr)'
+                              gap={4}
+                            >
+                              <GridItem colSpan={1} ><Text fontSize='2xl'>Prize Pot</Text>
+
+                              </GridItem>
+                              <GridItem colSpan={4} > <Text fontWeight={`bold`} fontSize='3xl'>
+                                ~$92,151</Text>
+                                <Text>20,795 CAKE</Text></GridItem>
+                              <GridItem colSpan={1} ><Text fontSize='2xl'>Prize Pot</Text></GridItem>
+                              <GridItem colSpan={2} ><Text>You have
+                                0
+                                ticket this round</Text></GridItem>
+                              <GridItem colSpan={2}  >
+                                <Button
+                                  // focusBorderColor="none"
+                                  id="swap_button"
+                                  border="1px"
+                                  py={6}
+                                  borderRadius="5"
+                                  color={colorMode === "dark" ? "white" : "black"}
+                                  backgroundColor={
+                                    colorMode === "dark" ? "black" : "white"
+                                  }
+                                  fontFamily="Ropa Sans"
+                                  fontSize={"19px"}
+                                  fontWeight="150"
+
+                                >
+                                  Buy Instantly
+                                </Button></GridItem>
+                            </Grid>
+                            <Box>
+                              <Collapse in={show}>
+                                <Text>Match the winning number in the same order to share prizes. Current prizes up for grabs:</Text>
+                                <Grid
+                                  mt={8}
+                                  
+                                  // h='200px'
+                                  templateColumns='repeat(4, 1fr)'
+                                  gap={4}
+                                >
+                                  <GridItem colSpan={1} >
+                                    <Text fontWeight={`bold`} fontSize=''>Match first 1</Text>
+                                    <Text fontWeight={`bold`} fontSize='xl'>416 CAKE</Text>
+                                    <Text>~$1,845</Text>
+                                  </GridItem>
+                                  <GridItem colSpan={1} >
+                                    <Text fontWeight={`bold`} fontSize=''>Match first 2</Text>
+                                    <Text fontWeight={`bold`} fontSize='xl'>416 CAKE</Text>
+                                    <Text>~$1,845</Text>
+                                  </GridItem>
+                                  <GridItem colSpan={1} >
+                                    <Text fontWeight={`bold`} fontSize=''>Match first 3</Text>
+                                    <Text fontWeight={`bold`} fontSize='xl'>416 CAKE</Text>
+                                    <Text>~$1,845</Text>
+                                  </GridItem>
+                                  <GridItem colSpan={1} >
+                                    <Text fontWeight={`bold`} fontSize=''>Match first 4</Text>
+                                    <Text fontWeight={`bold`} fontSize='xl'>416 CAKE</Text>
+                                    <Text>~$1,845</Text>
+                                  </GridItem>
+                                  <GridItem colSpan={1} >
+                                    <Text fontWeight={`bold`} fontSize=''>Match first 5</Text>
+                                    <Text fontWeight={`bold`} fontSize='xl'>416 CAKE</Text>
+                                    <Text>~$1,845</Text>
+                                  </GridItem>
+                                  <GridItem colSpan={1} >
+                                    <Text fontWeight={`bold`} fontSize=''>Match all 6</Text>
+                                    <Text fontWeight={`bold`} fontSize='xl'>416 CAKE</Text>
+                                    <Text>~$1,845</Text>
+                                  </GridItem>
+                                  <GridItem colSpan={1} >
+                                    <Text fontWeight={`bold`} color='tomato' fontSize=''>Burn</Text>
+                                    <Text fontWeight={`bold`} fontSize='xl'>416 CAKE</Text>
+                                    <Text>~$1,845</Text>
+                                  </GridItem>
+                                </Grid>
+                              </Collapse>
+                              <Divider mt={5} />
+                              <Center>
+                                <Button w={100} _hover={{ background: 'transparent' }} background={`transparent`} size='sm' onClick={handleToggle} mt='1rem'>
+                                   {show ? 'Hide 🔼' : 'Details 🔽'} 
+                                </Button>
+                              </Center>
+
+                            </Box>
+                          </Box>
+
+                        </>
+                      </Box>
+                    </Box>
+                  </Flex>
+                </VStack>
+              </Box>
+            </Flex>
+          </Box>
+          <Menu />
+          <Footer />
+        </Box>
+
+      </Container>
       <Modal isOpen={isOpen} onClose={onClose} isCentered>
         <ModalOverlay />
         <ModalContent mt={`130`} borderRadius="10px">

@@ -524,7 +524,7 @@ const Lottery = () => {
                             </Grid>
                             <Box>
                               <Collapse in={show}>
-                                <Text>Match the winning number in the same order to share prizes. Current prizes up for grabs:</Text>
+                                <Text>Match the winning number in the same order to share prize. Current prizes up for grabs:</Text>
                                 <Grid
                                   mt={8}
                                   

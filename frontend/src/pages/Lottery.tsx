@@ -203,15 +203,15 @@ const Lottery = () => {
                                   min={0}
                                 />
                                 <Flex justifyContent='right' mt='2'>
-                                  <Text >~0.00 CAKE</Text>
+                                  <Text >~0.00 BABY</Text>
                                 </Flex>
                               </Box>
                               <Flex justifyContent={"right"} flexDir='column' alignItems='flex-end'>
                                 <Text fontSize='sm' color='tomato' mt="0px" >
-                                  Insufficient CAKE balance
+                                  Insufficient BABY balance
                                 </Text>
                                 <Text fontSize='sm' mt="0px" >
-                                  CAKE Balance: 0.000
+                                  BABY Balance: 0.000
                                 </Text>
                               </Flex>
                               <Flex mt={`2`}>
@@ -225,11 +225,11 @@ const Lottery = () => {
                               </Flex>
                               <Flex>
                                 <Box p='4' >
-                                  Cost (CAKE)
+                                  Cost (BABY)
                                 </Box>
                                 <Spacer />
                                 <Box p='4' >
-                                  0 CAKE
+                                  0 BABY
                                 </Box>
                               </Flex>
                               <Flex>
@@ -238,7 +238,7 @@ const Lottery = () => {
                                 </Box>
                                 <Spacer />
                                 <Box p='4' >
-                                  ~0  CAKE
+                                  ~0  BABY
                                 </Box>
                               </Flex>
                               <Divider />
@@ -248,7 +248,7 @@ const Lottery = () => {
                                 </Box>
                                 <Spacer />
                                 <Box p='4' fontWeight={`bold`} >
-                                  ~0 CAKE
+                                  ~0 BABY
                                 </Box>
                               </Flex>
                             </Flex>
@@ -498,7 +498,7 @@ const Lottery = () => {
                               </GridItem>
                               <GridItem colSpan={4} > <Text fontWeight={`bold`} fontSize='3xl'>
                                 ~$92,151</Text>
-                                <Text>20,795 CAKE</Text></GridItem>
+                                <Text>20,795 BABY</Text></GridItem>
                               <GridItem colSpan={1} ><Text fontSize='2xl'>Prize Pot</Text></GridItem>
                               <GridItem colSpan={2} ><Text>You have
                                 0
@@ -534,37 +534,37 @@ const Lottery = () => {
                                 >
                                   <GridItem colSpan={1} >
                                     <Text fontWeight={`bold`} fontSize=''>Match first 1</Text>
-                                    <Text fontWeight={`bold`} fontSize='xl'>416 CAKE</Text>
+                                    <Text fontWeight={`bold`} fontSize='xl'>416 BABY</Text>
                                     <Text>~$1,845</Text>
                                   </GridItem>
                                   <GridItem colSpan={1} >
                                     <Text fontWeight={`bold`} fontSize=''>Match first 2</Text>
-                                    <Text fontWeight={`bold`} fontSize='xl'>416 CAKE</Text>
+                                    <Text fontWeight={`bold`} fontSize='xl'>416 BABY</Text>
                                     <Text>~$1,845</Text>
                                   </GridItem>
                                   <GridItem colSpan={1} >
                                     <Text fontWeight={`bold`} fontSize=''>Match first 3</Text>
-                                    <Text fontWeight={`bold`} fontSize='xl'>416 CAKE</Text>
+                                    <Text fontWeight={`bold`} fontSize='xl'>416 BABY</Text>
                                     <Text>~$1,845</Text>
                                   </GridItem>
                                   <GridItem colSpan={1} >
                                     <Text fontWeight={`bold`} fontSize=''>Match first 4</Text>
-                                    <Text fontWeight={`bold`} fontSize='xl'>416 CAKE</Text>
+                                    <Text fontWeight={`bold`} fontSize='xl'>416 BABY</Text>
                                     <Text>~$1,845</Text>
                                   </GridItem>
                                   <GridItem colSpan={1} >
                                     <Text fontWeight={`bold`} fontSize=''>Match first 5</Text>
-                                    <Text fontWeight={`bold`} fontSize='xl'>416 CAKE</Text>
+                                    <Text fontWeight={`bold`} fontSize='xl'>416 BABY</Text>
                                     <Text>~$1,845</Text>
                                   </GridItem>
                                   <GridItem colSpan={1} >
                                     <Text fontWeight={`bold`} fontSize=''>Match all 6</Text>
-                                    <Text fontWeight={`bold`} fontSize='xl'>416 CAKE</Text>
+                                    <Text fontWeight={`bold`} fontSize='xl'>416 BABY</Text>
                                     <Text>~$1,845</Text>
                                   </GridItem>
                                   <GridItem colSpan={1} >
                                     <Text fontWeight={`bold`} color='tomato' fontSize=''>Burn</Text>
-                                    <Text fontWeight={`bold`} fontSize='xl'>416 CAKE</Text>
+                                    <Text fontWeight={`bold`} fontSize='xl'>416 BABY</Text>
                                     <Text>~$1,845</Text>
                                   </GridItem>
                                 </Grid>
@@ -656,7 +656,7 @@ const Lottery = () => {
                       <Spacer />
                       <Box>
                         <Text fontWeight='bold' fontSize="lg">
-                          1.18 Cake
+                          1.18 BABY
                         </Text>
                       </Box>
                     </Flex>

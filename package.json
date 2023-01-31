@@ -4,7 +4,7 @@
     "@nomiclabs/hardhat-etherscan": "^2.1.4",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "chai": "^4.3.4",
-    "hardhat": "^2.5.0",
-    "mocha": "^7.2.0"
+    "hardhat": "^2.12.6",
+    "mocha": "^10.2.0"
   }
 }

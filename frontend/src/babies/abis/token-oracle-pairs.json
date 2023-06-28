@@ -1,0 +1,167 @@
+[
+    {
+        "chainId": 56,
+        "pairs": [
+            {
+                "symbol": "BABY",
+                "token": "0xa4e26bd6dcba9021dcd3a1159ba52e97cd770b8a",
+                "usd": "",
+                "decimals": 18
+            },
+            {
+                "symbol": "DAI",
+                "token": "0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3",
+                "usd": "0x132d3c0b1d2cea0bc552588063bdbb210fdeecfa",
+                "decimals": 18
+            },
+            {
+                "symbol": "USDC",
+                "token": "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+                "usd": "0x51597f405303c4377e36123cbc172b13269ea163",
+                "decimals": 18
+            },
+            {
+                "symbol": "USDT",
+                "token": "0x55d398326f99059ff775485246999027b3197955",
+                "usd": "0xb97ad0e74fa7d920791e90258a6e2085088b4320",
+                "decimals": 18
+            },
+            {
+                "symbol": "WETH",
+                "token": "0x2170ed0880ac9a755fd29b2688956bd959f933f8",
+                "usd": "0x9ef1b8c0e4f7dc8bf5719ea496883dc6401d5b2e",
+                "decimals": 18
+            },
+            {
+                "symbol": "WBTC",
+                "token": "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c",
+                "usd": "0x264990fbd0a4796a3e3d8e37c4d5f87a3aca5ebf",
+                "decimals": 18
+            },
+            {
+                "symbol": "WNATIVE",
+                "token": "0x0000000000000000000000000000000000001004",
+                "usd": "0x0567f2323251f0aab15c8dfb1967e4e8a7d42aee",
+                "decimals": 18
+            },
+            {
+                "symbol": "WBNB",
+                "token": "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
+                "usd": "0x0567f2323251f0aab15c8dfb1967e4e8a7d42aee",
+                "decimals": 18
+            },
+            {
+                "symbol": "CAKE",
+                "token": "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
+                "usd": "0xb6064ed41d4f67e353768aa239ca86f4f73665a1",
+                "decimals": 18
+            },
+            {
+                "symbol": "BUSD",
+                "token": "0xe9e7cea3dedca5984780bafc599bd69add087d56",
+                "usd": "0xcbb98864ef56e9042e7d2efef76141f15731b82f",
+                "decimals": 18
+            }
+        ]
+    },
+    {
+        "chainId": 137,
+        "pairs": [
+            {
+                "symbol": "BABY",
+                "token": "0xa4e26bd6dcba9021dcd3a1159ba52e97cd770b8a",
+                "usd": "",
+                "decimals": 18
+            },
+            {
+                "symbol": "DAI",
+                "token": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+                "usd": "0x4746dec9e833a82ec7c2c1356372ccf2cfcd2f3d",
+                "decimals": 18
+            },
+            {
+                "symbol": "USDC",
+                "token": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+                "usd": "0xfe4a8cc5b5b2366c1b58bea3858e81843581b2f7",
+                "decimals": 6
+            },
+            {
+                "symbol": "USDT",
+                "token": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
+                "usd": "0x0a6513e40db6eb1b165753ad52e80663aea50545",
+                "decimals": 6
+            },
+            {
+                "symbol": "WETH",
+                "token": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+                "usd": "0xF9680D99D6C9589e2a93a78A04A279e509205945",
+                "decimals": 18
+            },
+            {
+                "symbol": "WBTC",
+                "token": "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
+                "usd": "0xc907E116054Ad103354f2D350FD2514433D57F6f",
+                "decimals": 8
+            },
+            {
+                "symbol": "WNATIVE",
+                "token": "0x0000000000000000000000000000000000001010",
+                "usd": "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0",
+                "decimals": 18
+            },
+            {
+                "symbol": "WMATIC",
+                "token": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+                "usd": "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0",
+                "decimals": 18
+            }
+        ]
+    },
+    {
+        "chainId": 250,
+        "pairs": [
+            {
+                "symbol": "BABY",
+                "token": "0xa4e26bd6dcba9021dcd3a1159ba52e97cd770b8a",
+                "usd": "",
+                "decimals": 18
+            },
+            {
+                "symbol": "DAI",
+                "token": "0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E",
+                "usd": "0x91d5defaffe2854c7d02f50c80fa1fdc8a721e52",
+                "decimals": 18
+            },
+            {
+                "symbol": "USDC",
+                "token": "0x04068da6c83afcfa0e13ba15a6696662335d5b75",
+                "usd": "0x2553f4eeb82d5A26427b8d1106C51499CBa5D99c",
+                "decimals": 6
+            },
+            {
+                "symbol": "WETH",
+                "token": "0x74b23882a30290451a17c44f4f05243b6b58c76d",
+                "usd": "0x11DdD3d147E5b83D01cee7070027092397d63658",
+                "decimals": 18
+            },
+            {
+                "symbol": "WBTC",
+                "token": "0x321162cd933e2be498cd2267a90534a804051b11",
+                "usd": "0x8e94C22142F4A64b99022ccDd994f4e9EC86E4B4",
+                "decimals": 8
+            },
+            {
+                "symbol": "WNATIVE",
+                "token": "0xfc00face00000000000000000000000000000000",
+                "usd": "0xf4766552D15AE4d256Ad41B6cf2933482B0680dc",
+                "decimals": 18
+            },
+            {
+                "symbol": "WFTM",
+                "token": "0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83",
+                "usd": "0xf4766552D15AE4d256Ad41B6cf2933482B0680dc",
+                "decimals": 18
+            }
+        ]
+    }
+]
